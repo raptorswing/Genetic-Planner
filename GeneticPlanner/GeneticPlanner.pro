@@ -11,17 +11,22 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        MainWindow.cpp \
+        gui/MainWindow.cpp \
     Individual.cpp \
     Planner.cpp \
-    FitnessRunnable.cpp
+    FitnessRunnable.cpp \
+    gui/UAVParametersWidget.cpp \
+    UAVParameters.cpp
 
-HEADERS  += MainWindow.h \
+HEADERS  += gui/MainWindow.h \
     Individual.h \
     Planner.h \
-    FitnessRunnable.h
+    FitnessRunnable.h \
+    gui/UAVParametersWidget.h \
+    UAVParameters.h
 
-FORMS    += MainWindow.ui
+FORMS    += gui/MainWindow.ui \
+    gui/UAVParametersWidget.ui
 
 #Linkage for MapGraphics library
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MapGraphics/release/ -lMapGraphics
@@ -30,3 +35,6 @@ else:unix:!symbian: LIBS += -L$$OUT_PWD/../MapGraphics/ -lMapGraphics
 
 INCLUDEPATH += $$PWD/../MapGraphics
 DEPENDPATH += $$PWD/../MapGraphics
+
+RESOURCES += \
+    resources.qrc

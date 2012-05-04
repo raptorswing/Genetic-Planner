@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons/16x16">
+        <file>crystal_project/16x16/filesystems/folder_documents.png</file>
+        <file>crystal_project/16x16/actions/save_all.png</file>
+        <file>crystal_project/16x16/devices/3floppy_unmount.png</file>
+        <file>crystal_project/16x16/actions/reload.png</file>
+        <file>crystal_project/16x16/actions/cancel.png</file>
+        <file>crystal_project/16x16/actions/apply.png</file>
+    </qresource>
+</RCC>
