@@ -4,26 +4,29 @@
 #include <cmath>
 #include <QtDebug>
 
-const int ACTION_DISTANCE_MAX = 100.0;
-const int ACTION_DISTANCE_MIN = 10.0;
-const int TURNING_RATE_MAX_DEGREES_PER_SECOND = 5.0;
+const int ACTION_DISTANCE_MAX = 30.0;
+const int ACTION_DISTANCE_MIN = 2.0;
+const int TURNING_RATE_MAX_DEGREES_PER_SECOND = 20.0;
 const int SPEED_METERS_PER_SECOND = 15.0;
+const int MAX_ACTIONS = 30;
 
 const qreal PI = 3.1415926535897932384626433;
 
 Individual::Individual()
 {
-    int numberOfActions = (qrand() % 100) + 1;
+    int numberOfActions = (qrand() % MAX_ACTIONS) + 2;
     for (int i = 0; i < numberOfActions; i++)
         this->appendYawAction(Individual::randomYawAction());
+    _utilityComputed = false;
 }
 
 Individual::Individual(const Individual &A, const Individual &B)
 {
     int aSize = A._yawActions.size();
     int bSize = B._yawActions.size();
-    int numActions = qRound((aSize + bSize)/2.0);
 
+    /*
+    int numActions = qRound((aSize + bSize)/2.0);
     for (int i = 0; i < numActions; i++)
     {
         //If actions are available from both parents, choose randomly
@@ -39,12 +42,26 @@ Individual::Individual(const Individual &A, const Individual &B)
         else if (bSize > i)
             this->appendYawAction(B._yawActions[i]);
     }
+*/
+
+
+    int fromA = (qrand() % aSize) + 1;
+    int fromB = qrand() % bSize;
+
+    for (int i = 0; i < fromA; i++)
+        this->appendYawAction(A._yawActions[i]);
+    for (int i = fromA; i < B._yawActions.size() && i < fromB; i++)
+        this->appendYawAction(B._yawActions[i]);
+
+
+    _utilityComputed = false;
 }
 
 Individual::Individual(int numberOfActions)
 {
     for (int i = 0; i < numberOfActions; i++)
         this->appendYawAction(Individual::randomYawAction());
+    _utilityComputed = false;
 }
 
 Individual::~Individual()
@@ -73,6 +90,8 @@ QList<QPointF> Individual::generateGeoPoints(const QPointF &startingPos) const
     */
 
 
+    //Each "distance unit" is how many meters?
+    qreal distanceMult = 15.0;
     foreach(YawAction action, this->yawActions())
     {
         //We proceed in one-meter intervals
@@ -84,12 +103,14 @@ QList<QPointF> Individual::generateGeoPoints(const QPointF &startingPos) const
             //If the action is a turn, we have to change our direction
             if (!action.isStraight)
             {
-                qreal deltaRadPerMeter = action.turningRateRadsPerSecond / SPEED_METERS_PER_SECOND;
+                qreal deltaRadPerMeter = action.turningRateRadsPerSecond / SPEED_METERS_PER_SECOND * distanceMult;
                 directionRad += deltaRadPerMeter;
             }
             //Use the direction and project ahead a little bit
             enuPos.setX(cos(directionRad));
             enuPos.setY(sin(directionRad));
+            enuPos.normalize();
+            enuPos *= distanceMult;
             QPointF newGeoPos = Conversions::enu2lla(enuPos.x(),
                                                      enuPos.y(),
                                                      enuPos.z(),
@@ -101,6 +122,22 @@ QList<QPointF> Individual::generateGeoPoints(const QPointF &startingPos) const
     }
 
     return toRet;
+}
+
+bool Individual::isUtilityComputed() const
+{
+    return _utilityComputed;
+}
+
+qreal Individual::computedUtility() const
+{
+    return _utility;
+}
+
+void Individual::setUtility(qreal util)
+{
+    _utility = util;
+    _utilityComputed = true;
 }
 
 //private static

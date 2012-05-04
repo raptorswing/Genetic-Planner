@@ -10,7 +10,9 @@ public:
 
     Individual plan(int generations=100);
 
-    qreal fitness(const Individual& individual) const;
+    qreal fitness(Individual &individual) const;
+
+    static qreal normal(qreal x, qreal stdDev,qreal scaleFactor=1.0);
 };
 
 #endif // PLANNER_H

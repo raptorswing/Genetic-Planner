@@ -30,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _view->setTileSource(composite);
 
     CompositeTileSourceConfigurationWidget * dockContents = new CompositeTileSourceConfigurationWidget(composite,
-                                                                                                       this->ui->dockWidget);
-    this->ui->dockWidget->setWidget(dockContents);
+                                                                                                       this->ui->mapLayersDockWidget);
+    this->ui->mapLayersDockWidget->setWidget(dockContents);
     delete this->ui->dockWidgetContents;
 
     QPointF place(-111.649253,40.249707);
@@ -39,8 +39,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _view->centerOn(place);
 
 
+    /*
     Planner p;
-    Individual best = p.plan(500);
+    Individual best = p.plan(1000);
 
     qDebug() << "Result has length" << best.yawActions().size() << "and fitness" << p.fitness(best);
     QList<QPointF> geoPath = best.generateGeoPoints(place);
@@ -53,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
         _scene->addObject(circle);
         //qDebug() << QString::number(pos.x(),'g',10) << QString::number(pos.y(),'g',10);
     }
-
+    */
 }
 
 MainWindow::~MainWindow()

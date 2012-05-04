@@ -14,7 +14,10 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget"/>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="mapLayersDockWidget">
+   <property name="windowTitle">
+    <string>Map Layers</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>

@@ -47,10 +47,17 @@ public:
 
     QList<QPointF> generateGeoPoints(const QPointF& startingPos) const;
 
+    bool isUtilityComputed() const;
+    qreal computedUtility() const;
+    void setUtility(qreal util);
+
 private:
     QList<YawAction> _yawActions;
 
     static YawAction randomYawAction();
+
+    qreal _utility;
+    bool _utilityComputed;
 
 };
 
