@@ -7,7 +7,12 @@
 class UAVParameters
 {
 public:
+    /*!
+     \brief Creates an object with the default UAV parameters
+
+    */
     UAVParameters();
+
     UAVParameters(const qreal& speed,
                   const qreal& maxTurnRate,
                   const qreal& ceiling,

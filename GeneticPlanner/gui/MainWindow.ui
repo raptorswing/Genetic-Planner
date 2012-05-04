@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Evolutionary UAV Mission Planner</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resources.qrc">
+    <normaloff>:/icons/32x32/crystal_project/32x32/apps/spire.png</normaloff>:/icons/32x32/crystal_project/32x32/apps/spire.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget"/>
   <widget class="QDockWidget" name="mapLayersDockWidget">
@@ -32,8 +36,19 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_2"/>
   </widget>
+  <widget class="QDockWidget" name="sensorParametersDockWidget">
+   <property name="windowTitle">
+    <string>Sensor Parameters</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3"/>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

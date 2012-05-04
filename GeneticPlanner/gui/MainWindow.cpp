@@ -8,6 +8,7 @@
 #include "guts/CompositeTileSourceConfigurationWidget.h"
 #include "CircleObject.h"
 #include "UAVParametersWidget.h"
+#include "SensorParametersWidget.h"
 
 #include "Planner.h"
 
@@ -40,6 +41,11 @@ MainWindow::MainWindow(QWidget *parent) :
         UAVParametersWidget * uavParameters = new UAVParametersWidget(this->ui->uavParametersDockWidget);
         this->ui->uavParametersDockWidget->setWidget(uavParameters);
         delete this->ui->dockWidgetContents_2;
+    }
+    {
+        SensorParametersWidget * sensorParameters = new SensorParametersWidget(this->ui->sensorParametersDockWidget);
+        this->ui->sensorParametersDockWidget->setWidget(sensorParameters);
+        delete this->ui->dockWidgetContents_3;
     }
 
     QPointF place(-111.649253,40.249707);

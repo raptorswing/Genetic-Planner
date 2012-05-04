@@ -7,4 +7,7 @@
         <file>crystal_project/16x16/actions/cancel.png</file>
         <file>crystal_project/16x16/actions/apply.png</file>
     </qresource>
+    <qresource prefix="/icons/32x32">
+        <file>crystal_project/32x32/apps/spire.png</file>
+    </qresource>
 </RCC>
