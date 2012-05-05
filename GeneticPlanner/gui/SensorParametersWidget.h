@@ -18,6 +18,13 @@ public:
     explicit SensorParametersWidget(SensorDefinition sensorStuff, QWidget * parent=0);
     ~SensorParametersWidget();
 
+    void setOriginal(const SensorDefinition& orig);
+    void setCurrent(const SensorDefinition& curr);
+    void setValues(const SensorDefinition& original, const SensorDefinition& current);
+    SensorDefinition current() const;
+
+    void setHideCancelAndApply(bool);
+
 signals:
     void applied(SensorDefinition results);
     void cancelled();

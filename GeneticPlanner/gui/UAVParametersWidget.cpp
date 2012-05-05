@@ -26,6 +26,36 @@ UAVParametersWidget::~UAVParametersWidget()
     delete ui;
 }
 
+void UAVParametersWidget::setOriginal(const UAVParameters & orig)
+{
+    _original = orig;
+    this->loadGUIFromCurrent();
+}
+
+void UAVParametersWidget::setCurrent(const UAVParameters & curr)
+{
+    _current = curr;
+    this->loadGUIFromCurrent();
+}
+
+void UAVParametersWidget::setValues(const UAVParameters &original, const UAVParameters &current)
+{
+    _original = original;
+    _current = current;
+    this->loadGUIFromCurrent();
+}
+
+UAVParameters UAVParametersWidget::current() const
+{
+    return _current;
+}
+
+void UAVParametersWidget::setHideCancelAndApply(bool hide)
+{
+    this->ui->applyButton->setHidden(hide);
+    this->ui->cancelButton->setHidden(hide);
+}
+
 //private slot
 void UAVParametersWidget::handleAnyValueChanged()
 {

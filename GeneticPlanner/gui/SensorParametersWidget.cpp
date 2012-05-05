@@ -25,6 +25,36 @@ SensorParametersWidget::~SensorParametersWidget()
     delete ui;
 }
 
+void SensorParametersWidget::setOriginal(const SensorDefinition &orig)
+{
+    _original = orig;
+    this->loadGUIFromCurrent();
+}
+
+void SensorParametersWidget::setCurrent(const SensorDefinition &curr)
+{
+    _current = curr;
+    this->loadGUIFromCurrent();
+}
+
+void SensorParametersWidget::setValues(const SensorDefinition &original, const SensorDefinition &current)
+{
+    _original = original;
+    _current = current;
+    this->loadGUIFromCurrent();
+}
+
+SensorDefinition SensorParametersWidget::current() const
+{
+    return _current;
+}
+
+void SensorParametersWidget::setHideCancelAndApply(bool hide)
+{
+    this->ui->applyButton->setHidden(hide);
+    this->ui->cancelButton->setHidden(hide);
+}
+
 //private slot
 void SensorParametersWidget::handleAnyValueChanged()
 {

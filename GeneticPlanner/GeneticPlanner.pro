@@ -18,7 +18,10 @@ SOURCES += main.cpp\
     gui/UAVParametersWidget.cpp \
     UAVParameters.cpp \
     SensorDefinition.cpp \
-    gui/SensorParametersWidget.cpp
+    gui/SensorParametersWidget.cpp \
+    gui/PlanningControlWidget.cpp \
+    gui/PlanningWizard.cpp \
+    PlanningProblem.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -27,11 +30,16 @@ HEADERS  += gui/MainWindow.h \
     gui/UAVParametersWidget.h \
     UAVParameters.h \
     SensorDefinition.h \
-    gui/SensorParametersWidget.h
+    gui/SensorParametersWidget.h \
+    gui/PlanningControlWidget.h \
+    gui/PlanningWizard.h \
+    PlanningProblem.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \
-    gui/SensorParametersWidget.ui
+    gui/SensorParametersWidget.ui \
+    gui/PlanningControlWidget.ui \
+    gui/PlanningWizard.ui
 
 #Linkage for MapGraphics library
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MapGraphics/release/ -lMapGraphics

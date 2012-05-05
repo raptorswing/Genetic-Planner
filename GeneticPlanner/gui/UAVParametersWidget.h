@@ -18,6 +18,13 @@ public:
     explicit UAVParametersWidget(const UAVParameters& params, QWidget * parent = 0);
     ~UAVParametersWidget();
 
+    void setOriginal(const UAVParameters&);
+    void setCurrent(const UAVParameters&);
+    void setValues(const UAVParameters& original, const UAVParameters& current);
+    UAVParameters current() const;
+
+    void setHideCancelAndApply(bool);
+
 signals:
     void applied(UAVParameters results);
     void cancelled();

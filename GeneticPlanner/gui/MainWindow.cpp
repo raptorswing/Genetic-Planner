@@ -9,8 +9,9 @@
 #include "CircleObject.h"
 #include "UAVParametersWidget.h"
 #include "SensorParametersWidget.h"
-
+#include "PlanningControlWidget.h"
 #include "Planner.h"
+#include "PlanningWizard.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -18,12 +19,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
-
+    //Setup MapGraphicsScene and View
     _scene = new MapGraphicsScene(this);
     _view = new MapGraphicsView(_scene,this);
     this->setCentralWidget(_view);
 
+    //Setup tile sources for the MapGraphicsView
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource());
     QSharedPointer<MapTileSource> osm(new OSMTileSource());
     QSharedPointer<MapTileSource> mqSat(new OSMTileSource(OSMTileSource::MapQuestAerialTiles));
@@ -31,44 +32,27 @@ MainWindow::MainWindow(QWidget *parent) :
     composite->addSourceBottom(mqSat);
     _view->setTileSource(composite);
 
-    {
-        CompositeTileSourceConfigurationWidget * dockContents = new CompositeTileSourceConfigurationWidget(composite,
-                                                                                                           this->ui->mapLayersDockWidget);
-        this->ui->mapLayersDockWidget->setWidget(dockContents);
-        delete this->ui->dockWidgetContents;
-    }
-    {
-        UAVParametersWidget * uavParameters = new UAVParametersWidget(this->ui->uavParametersDockWidget);
-        this->ui->uavParametersDockWidget->setWidget(uavParameters);
-        delete this->ui->dockWidgetContents_2;
-    }
-    {
-        SensorParametersWidget * sensorParameters = new SensorParametersWidget(this->ui->sensorParametersDockWidget);
-        this->ui->sensorParametersDockWidget->setWidget(sensorParameters);
-        delete this->ui->dockWidgetContents_3;
-    }
-
+    //Zoom into BYU campus by default
     QPointF place(-111.649253,40.249707);
     _view->setZoomLevel(15);
     _view->centerOn(place);
 
+    //Create a helpful dock widget to allow the user to tweak map layers
+    CompositeTileSourceConfigurationWidget * layerAdjust = new CompositeTileSourceConfigurationWidget(composite,this->ui->mapLayersDockWidget);
+    this->ui->mapLayersDockWidget->setWidget(layerAdjust);
+    delete this->ui->dockWidgetContents;
 
-    /*
-    Planner p;
-    Individual best = p.plan(1000);
+    //Create a helpful dock widget to allow the user to start/stop planning
+    PlanningControlWidget * planControl = new PlanningControlWidget(this->ui->planningControlDockWidget);
+    this->ui->planningControlDockWidget->setWidget(planControl);
+    delete this->ui->dockWidgetContents_5;
 
-    qDebug() << "Result has length" << best.yawActions().size() << "and fitness" << p.fitness(best);
-    QList<QPointF> geoPath = best.generateGeoPoints(place);
+    //Spawn a helpful wizard!
+    PlanningWizard * wizard = new PlanningWizard(this);
+    wizard->show();
 
-
-    foreach(QPointF pos, geoPath)
-    {
-        CircleObject * circle = new CircleObject(4.0,false,Qt::red);
-        circle->setPos(pos);
-        _scene->addObject(circle);
-        //qDebug() << QString::number(pos.x(),'g',10) << QString::number(pos.y(),'g',10);
-    }
-    */
+    //Maximize ourselves
+    this->showMaximized();
 }
 
 MainWindow::~MainWindow()
