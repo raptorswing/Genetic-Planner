@@ -14,11 +14,18 @@ class PlanningControlWidget : public QWidget
 public:
     explicit PlanningControlWidget(QWidget *parent = 0);
     ~PlanningControlWidget();
+
+    void setIsPlanningRunning(bool);
+
+signals:
+    void planningStartRequested(qreal desiredFitness);
+    void planningPauseRequested();
+    void planningClearRequested();
     
 private slots:
     void on_resetButton_clicked();
 
-    void on_planResumeButton_clicked();
+    void on_planResumeButton_toggled();
 
     void on_desiredFitnessSpinBox_valueChanged(double arg1);
 

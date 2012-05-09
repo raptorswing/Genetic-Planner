@@ -4,11 +4,11 @@
 #include <cmath>
 #include <QtDebug>
 
-const int ACTION_DISTANCE_MAX = 30.0;
+const int ACTION_DISTANCE_MAX = 10.0;
 const int ACTION_DISTANCE_MIN = 2.0;
 const int TURNING_RATE_MAX_DEGREES_PER_SECOND = 20.0;
 const int SPEED_METERS_PER_SECOND = 15.0;
-const int MAX_ACTIONS = 30;
+const int MAX_ACTIONS = 100;
 
 const qreal PI = 3.1415926535897932384626433;
 

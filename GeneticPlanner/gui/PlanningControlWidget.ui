@@ -87,11 +87,14 @@
      <item>
       <widget class="QPushButton" name="planResumeButton">
        <property name="text">
-        <string>Plan / Resume</string>
+        <string>Plan / Pause</string>
        </property>
        <property name="icon">
         <iconset resource="../resources.qrc">
          <normaloff>:/icons/16x16/crystal_project/16x16/actions/run.png</normaloff>:/icons/16x16/crystal_project/16x16/actions/run.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

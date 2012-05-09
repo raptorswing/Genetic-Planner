@@ -2,17 +2,14 @@
 #define PLANNER_H
 
 #include "Individual.h"
+#include "PlanningProblem.h"
 
 class Planner
 {
 public:
     Planner();
 
-    Individual plan(int generations=100);
-
-    qreal fitness(Individual &individual) const;
-
-    static qreal normal(qreal x, qreal stdDev,qreal scaleFactor=1.0);
+    Individual plan(PlanningProblem * problem, int generations=1000);
 };
 
 #endif // PLANNER_H

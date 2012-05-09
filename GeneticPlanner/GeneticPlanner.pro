@@ -21,7 +21,11 @@ SOURCES += main.cpp\
     gui/SensorParametersWidget.cpp \
     gui/PlanningControlWidget.cpp \
     gui/PlanningWizard.cpp \
-    PlanningProblem.cpp
+    PlanningProblem.cpp \
+    PathTask.cpp \
+    FlyThroughTask.cpp \
+    gui/PaletteWidget.cpp \
+    EndingTask.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -33,13 +37,18 @@ HEADERS  += gui/MainWindow.h \
     gui/SensorParametersWidget.h \
     gui/PlanningControlWidget.h \
     gui/PlanningWizard.h \
-    PlanningProblem.h
+    PlanningProblem.h \
+    PathTask.h \
+    FlyThroughTask.h \
+    gui/PaletteWidget.h \
+    EndingTask.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \
     gui/SensorParametersWidget.ui \
     gui/PlanningControlWidget.ui \
-    gui/PlanningWizard.ui
+    gui/PlanningWizard.ui \
+    gui/PaletteWidget.ui
 
 #Linkage for MapGraphics library
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MapGraphics/release/ -lMapGraphics

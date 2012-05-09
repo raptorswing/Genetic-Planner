@@ -1,17 +1,17 @@
 #include "FitnessRunnable.h"
 
-#include "Planner.h"
+#include "PlanningProblem.h"
 #include "Individual.h"
 
-FitnessRunnable::FitnessRunnable(Planner * planner,Individual *individual) :
-    _planner(planner), _individual(individual)
+FitnessRunnable::FitnessRunnable(PlanningProblem * problem,Individual *individual) :
+    _problem(problem), _individual(individual)
 {
     this->setAutoDelete(false);
 }
 
 void FitnessRunnable::run()
 {
-    _result = _planner->fitness(*_individual);
+    _result = _problem->fitness(*_individual);
 }
 
 qreal FitnessRunnable::result() const

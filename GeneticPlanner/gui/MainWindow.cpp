@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 
 #include <QtDebug>
+#include <QMessageBox>
 
 #include "tileSources/CompositeTileSource.h"
 #include "tileSources/OSMTileSource.h"
@@ -37,19 +38,37 @@ MainWindow::MainWindow(QWidget *parent) :
     _view->setZoomLevel(15);
     _view->centerOn(place);
 
-    //Create a helpful dock widget to allow the user to tweak map layers
-    CompositeTileSourceConfigurationWidget * layerAdjust = new CompositeTileSourceConfigurationWidget(composite,this->ui->mapLayersDockWidget);
-    this->ui->mapLayersDockWidget->setWidget(layerAdjust);
-    delete this->ui->dockWidgetContents;
+    //Provide our "map layers" dock widget with the composite tile source to be configured
+    this->ui->mapLayersWidget->setComposite(composite);
 
-    //Create a helpful dock widget to allow the user to start/stop planning
-    PlanningControlWidget * planControl = new PlanningControlWidget(this->ui->planningControlDockWidget);
-    this->ui->planningControlDockWidget->setWidget(planControl);
-    delete this->ui->dockWidgetContents_5;
+    //When the user clicks "start planning" on the control widget, we want to start planning
+    connect(this->ui->planningControlWidget,
+            SIGNAL(planningStartRequested(qreal)),
+            this,
+            SLOT(handlePlanningControlStart(qreal)));
+
+    connect(this->ui->planningControlWidget,
+            SIGNAL(planningClearRequested()),
+            this,
+            SLOT(handlePlanningControlReset()));
+
+    //When the user users the palette to request adding an end point
+    connect(this->ui->paletteWidget,
+            SIGNAL(addEndPointRequested()),
+            this,
+            SLOT(handleEndPointAddRequested()));
+
+    //When the user users the palette to request adding a start point
+    connect(this->ui->paletteWidget,
+            SIGNAL(addStartPointRequested()),
+            this,
+            SLOT(handleStartPointAddRequested()));
 
     //Spawn a helpful wizard!
+    /*
     PlanningWizard * wizard = new PlanningWizard(this);
     wizard->show();
+    */
 
     //Maximize ourselves
     this->showMaximized();
@@ -58,4 +77,84 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+//private slot
+void MainWindow::handlePlanningControlStart(qreal desiredFitness)
+{
+    if (!_problem.isReady())
+    {
+        QMessageBox::information(this,
+                                 "Cannot Plan - Problem is incomplete",
+                                 "Planning cannot begin until you provide enough information");
+        this->ui->planningControlWidget->setIsPlanningRunning(false);
+        return;
+    }
+
+    Planner planner;
+    Individual result = planner.plan(&_problem, desiredFitness);
+
+    QList<QPointF> geo = result.generateGeoPoints(_problem.startingPos());
+
+    foreach(QPointF pos, geo)
+    {
+        CircleObject * circle = new CircleObject(3.0,false,Qt::yellow);
+        _scene->addObject(circle);
+        circle->setPos(pos);
+        _pathObjects.insert(circle);
+    }
+
+    this->ui->planningControlWidget->setIsPlanningRunning(false);
+}
+
+//private slot
+void MainWindow::handlePlanningControlReset()
+{
+    foreach(MapGraphicsObject * obj, _pathObjects)
+    {
+        obj->deleteLater();
+    }
+    _pathObjects.clear();
+}
+
+//private slot
+void MainWindow::handleStartPointAddRequested()
+{
+    if (_startPositionMarker.isNull())
+    {
+        _startPositionMarker = new CircleObject(6.0,true,Qt::green);
+        _scene->addObject(_startPositionMarker);
+        connect(_startPositionMarker.data(),
+                SIGNAL(posChanged()),
+                this,
+                SLOT(handleStartPositionMarkerPosChanged()));
+    }
+    _startPositionMarker->setPos(_view->center());
+}
+
+//private slot
+void MainWindow::handleEndPointAddRequested()
+{
+    if (_endPositionMarker.isNull())
+    {
+        _endPositionMarker = new CircleObject(6.0,true,Qt::red);
+        _scene->addObject(_endPositionMarker);
+        connect(_endPositionMarker.data(),
+                SIGNAL(posChanged()),
+                this,
+                SLOT(handleEndPositionMarkerPosChanged()));
+    }
+    _endPositionMarker->setPos(_view->center());
+}
+
+//private slot
+void MainWindow::handleStartPositionMarkerPosChanged()
+{
+    _problem.setStartingPos(_startPositionMarker->pos());
+}
+
+//private slot
+void MainWindow::handleEndPositionMarkerPosChanged()
+{
+    _problem.setEndingPos(_endPositionMarker->pos());
 }

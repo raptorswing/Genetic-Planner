@@ -18,19 +18,20 @@ Planner::Planner()
     qsrand(QDateTime::currentDateTime().toTime_t());
 }
 
-Individual Planner::plan(int generations)
+Individual Planner::plan(PlanningProblem *problem, int generations)
 {
     QMap<qreal, Individual *> genePool;
 
     const int mutantCount = 150;
     const int breedCount = 15;
+    const int keepCount = 25;
 
     //Must be at least mutantCount
     const int generationSize = mutantCount + breedCount;
 
     qreal desiredBest = 2000;
     qreal bestSoFar = 0.0;
-    for (int g = 0; true ; g++)
+    for (int g = 0; g < generations ; g++)
     {
         //Breed the survivors
         QList<Individual *> newIndividuals;
@@ -44,11 +45,6 @@ Individual Planner::plan(int generations)
             Individual * A = genePool.value(keyA);
             Individual * B = genePool.value(keyB);
             Individual * newIndividual = new Individual(*A,*B);
-            /*
-            qreal fitness = this->fitness(*newIndividual);
-            newIndividual->setUtility(fitness);
-            genePool.insertMulti(newIndividual->computedUtility(),newIndividual);
-            */
             newIndividuals.append(newIndividual);
         }
 
@@ -57,11 +53,6 @@ Individual Planner::plan(int generations)
         for (int i = 0; i < generationSize; i++)
         {
             Individual * newIndividual = new Individual();
-            /*
-            qreal fitness = this->fitness(*newIndividual);
-            newIndividual->setUtility(fitness);
-            genePool.insertMulti(newIndividual->computedUtility(),newIndividual);
-            */
             newIndividuals.append(newIndividual);
         }
 
@@ -70,7 +61,7 @@ Individual Planner::plan(int generations)
         QList<FitnessRunnable  *> runnables;
         foreach(Individual * ind, newIndividuals)
         {
-            FitnessRunnable * runnable = new FitnessRunnable(this,ind);
+            FitnessRunnable * runnable = new FitnessRunnable(problem,ind);
             runnables.append(runnable);
             pool->start(runnable);
         }
@@ -104,7 +95,7 @@ Individual Planner::plan(int generations)
         }
 
         //Eliminate half
-        for (int i = 0; i < genePool.size()/2; i++)
+        for (int i = 0; i < genePool.size() - keepCount; i++)
         {
             Individual * removed = genePool.take(genePool.keys().first());
             delete removed;
@@ -121,6 +112,7 @@ Individual Planner::plan(int generations)
     return toRet;
 }
 
+/*
 qreal Planner::fitness(Individual &individual) const
 {
     if (individual.isUtilityComputed())
@@ -246,10 +238,4 @@ qreal Planner::fitness(Individual &individual) const
     individual.setUtility(toRet);
     return toRet;
 }
-
-qreal Planner::normal(qreal x, qreal stdDev, qreal scaleFactor)
-{
-    qreal expPart = exp(-0.5 * pow(x / stdDev, 2.0) / scaleFactor);
-    qreal otherPart = stdDev * SQRT2PI;
-    return (1.0 / otherPart) * expPart;
-}
+*/

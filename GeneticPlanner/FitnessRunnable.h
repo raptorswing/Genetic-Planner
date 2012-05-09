@@ -3,20 +3,20 @@
 
 #include <QRunnable>
 
-class Planner;
+#include "PlanningProblem.h"
 #include "Individual.h"
 
 class FitnessRunnable : public QRunnable
 {
 public:
-    FitnessRunnable(Planner * planner,Individual * individual);
+    FitnessRunnable(PlanningProblem * problem,Individual * individual);
 
     virtual void run();
 
     qreal result() const;
 
 private:
-    Planner * _planner;
+    PlanningProblem * _problem;
     Individual * _individual;
     qreal _result;
 };

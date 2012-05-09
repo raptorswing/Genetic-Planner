@@ -13,20 +13,28 @@ PlanningControlWidget::~PlanningControlWidget()
     delete ui;
 }
 
-//private slot
-void PlanningControlWidget::on_resetButton_clicked()
+void PlanningControlWidget::setIsPlanningRunning(bool running)
 {
-
+    this->ui->planResumeButton->setChecked(running);
 }
 
 //private slot
-void PlanningControlWidget::on_planResumeButton_clicked()
+void PlanningControlWidget::on_resetButton_clicked()
 {
+    this->planningClearRequested();
+}
 
+//private slot
+void PlanningControlWidget::on_planResumeButton_toggled()
+{
+    if (this->ui->planResumeButton->isChecked())
+        this->planningStartRequested(this->ui->desiredFitnessSpinBox->value());
+    else
+        this->planningPauseRequested();
 }
 
 //private slot
 void PlanningControlWidget::on_desiredFitnessSpinBox_valueChanged(double arg1)
 {
-
+    Q_UNUSED(arg1)
 }

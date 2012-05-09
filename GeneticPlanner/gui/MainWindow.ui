@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>676</width>
-    <height>607</height>
+    <width>539</width>
+    <height>533</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents"/>
+   <widget class="CompositeTileSourceConfigurationWidget" name="mapLayersWidget"/>
   </widget>
   <widget class="QDockWidget" name="planningControlDockWidget">
    <property name="windowTitle">
@@ -34,10 +34,36 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_5"/>
+   <widget class="PlanningControlWidget" name="planningControlWidget"/>
+  </widget>
+  <widget class="QDockWidget" name="paletteDockWidget">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="PaletteWidget" name="paletteWidget"/>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>PlanningControlWidget</class>
+   <extends>QWidget</extends>
+   <header>PlanningControlWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PaletteWidget</class>
+   <extends>QWidget</extends>
+   <header>PaletteWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CompositeTileSourceConfigurationWidget</class>
+   <extends>QWidget</extends>
+   <header>guts/CompositeTileSourceConfigurationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources.qrc"/>
  </resources>
