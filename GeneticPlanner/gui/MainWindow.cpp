@@ -8,11 +8,13 @@
 #include "tileSources/OSMTileSource.h"
 #include "guts/CompositeTileSourceConfigurationWidget.h"
 #include "CircleObject.h"
+#include "TaskAreaObject.h"
 #include "UAVParametersWidget.h"
 #include "SensorParametersWidget.h"
 #include "PlanningControlWidget.h"
 #include "Planner.h"
 #include "PlanningWizard.h"
+#include "NoFlyTask.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,17 +54,23 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(handlePlanningControlReset()));
 
-    //When the user users the palette to request adding an end point
+    //When the user uses the palette to request adding an end point
     connect(this->ui->paletteWidget,
             SIGNAL(addEndPointRequested()),
             this,
             SLOT(handleEndPointAddRequested()));
 
-    //When the user users the palette to request adding a start point
+    //When the user uses the palette to request adding a start point
     connect(this->ui->paletteWidget,
             SIGNAL(addStartPointRequested()),
             this,
             SLOT(handleStartPointAddRequested()));
+
+    //When the user uses the palette to request adding a task area
+    connect(this->ui->paletteWidget,
+            SIGNAL(addTaskAreaRequested()),
+            this,
+            SLOT(handleTaskAreaAddRequested()));
 
     //Spawn a helpful wizard!
     /*
@@ -145,6 +153,20 @@ void MainWindow::handleEndPointAddRequested()
                 SLOT(handleEndPositionMarkerPosChanged()));
     }
     _endPositionMarker->setPos(_view->center());
+}
+
+//private slot
+void MainWindow::handleTaskAreaAddRequested()
+{
+    const qreal degrees = 0.001;
+    QPointF topLeft = _view->center() + QPointF(-1*degrees,degrees);
+    QPointF topRight = _view->center() + QPointF(degrees,degrees);
+    QPointF bottomLeft = _view->center() + QPointF(-1*degrees,-1*degrees);
+    QPointF bottomRight = _view->center() + QPointF(degrees,-1*degrees);
+    QPolygonF geoPoly;
+    geoPoly << topLeft << topRight << bottomRight << bottomLeft;
+    TaskAreaObject * obj = new TaskAreaObject(geoPoly);
+    _scene->addObject(obj);
 }
 
 //private slot

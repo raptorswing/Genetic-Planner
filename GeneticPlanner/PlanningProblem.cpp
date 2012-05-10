@@ -3,14 +3,16 @@
 #include "FlyThroughTask.h"
 #include "EndingTask.h"
 
-PlanningProblem::PlanningProblem()
+PlanningProblem::PlanningProblem(QObject *parent) :
+    QObject(parent)
 {
     _isStartingDefined = false;
     _isEndingDefined = false;
     _endingTask = 0;
 }
 
-PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDefinition &sensorParams)
+PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDefinition &sensorParams,QObject * parent) :
+    QObject(parent)
 {
     this->setUAVSettings(uavParams);
     this->setSensorSettings(sensorParams);
@@ -45,10 +47,12 @@ qreal PlanningProblem::fitness(const Individual &individual)
     }
 
     //Punish long paths
+    /*
     {
         qreal shortReward = 10 * toRet / geoPositions.length();
         toRet += shortReward;
     }
+    */
 
     return toRet;
 }
@@ -119,4 +123,9 @@ void PlanningProblem::setEndingPos(QPointF endingPos, qreal endingAlt)
     if (_endingTask)
         delete _endingTask;
     _endingTask = new EndingTask(endingPos,15.0);
+}
+
+void PlanningProblem::addTask(PathTask *pathTask)
+{
+    _tasks.append(pathTask);
 }

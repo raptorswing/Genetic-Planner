@@ -22,3 +22,8 @@ void PaletteWidget::on_endPointButton_clicked()
 {
     this->addEndPointRequested();
 }
+
+void PaletteWidget::on_taskAreaButton_clicked()
+{
+    this->addTaskAreaRequested();
+}

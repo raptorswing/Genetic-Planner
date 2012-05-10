@@ -28,6 +28,7 @@ private slots:
     void handlePlanningControlReset();
     void handleStartPointAddRequested();
     void handleEndPointAddRequested();
+    void handleTaskAreaAddRequested();
     void handleStartPositionMarkerPosChanged();
     void handleEndPositionMarkerPosChanged();
     

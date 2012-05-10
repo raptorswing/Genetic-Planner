@@ -29,7 +29,7 @@ Individual Planner::plan(PlanningProblem *problem, int generations)
     //Must be at least mutantCount
     const int generationSize = mutantCount + breedCount;
 
-    qreal desiredBest = 2000;
+    qreal desiredBest = 3000;
     qreal bestSoFar = 0.0;
     for (int g = 0; g < generations ; g++)
     {

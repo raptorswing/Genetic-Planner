@@ -4,18 +4,22 @@
 #include <QPointF>
 #include <QList>
 #include <QPointer>
+#include <QObject>
 
 #include "UAVParameters.h"
 #include "SensorDefinition.h"
 #include "Individual.h"
 #include "PathTask.h"
+#include "PolygonObject.h"
 
-class PlanningProblem
+class PlanningProblem : public QObject
 {
+    Q_OBJECT
 public:
-    PlanningProblem();
+    PlanningProblem(QObject * parent = 0);
     PlanningProblem(const UAVParameters& uavParams,
-                    const SensorDefinition& sensorParams);
+                    const SensorDefinition& sensorParams,
+                    QObject * parent = 0);
 
     bool isReady() const;
 
@@ -36,7 +40,9 @@ public:
     void setSensorSettings(const SensorDefinition& sensorParams);
 
     void setStartingPos(QPointF startingPos,qreal startingAlt=1423);
-    void setEndingPos(QPointF endingPos, qreal endingALt=1423);
+    void setEndingPos(QPointF endingPos, qreal endingAlt=1423);
+
+    void addTask(PathTask * pathTask);
 
 private:
     UAVParameters _uavSettings;

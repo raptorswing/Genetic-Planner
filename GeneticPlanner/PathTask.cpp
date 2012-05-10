@@ -1,5 +1,7 @@
 #include "PathTask.h"
 
+#include <cmath>
+
 const qreal PI = 3.1415926535897932384626433;
 const qreal SQRT2PI = sqrt(2.0*PI);
 
