@@ -182,7 +182,64 @@ void MainWindow::handleEndPositionMarkerPosChanged()
 }
 
 //private slot
+void MainWindow::undo()
+{
+    if (_undoStack.isEmpty())
+        return;
+
+    QSharedPointer<MWCommand> last = _undoStack.pop();
+    last->unExec();
+    _redoStack.push(last);
+    this->MWCommandExecuted();
+}
+
+//private slot
+void MainWindow::redo()
+{
+    if (_redoStack.isEmpty())
+        return;
+
+    QSharedPointer<MWCommand> last = _redoStack.pop();
+    last->exec();
+    _undoStack.push(last);
+    this->MWCommandExecuted();
+}
+
+//private slot
+void MainWindow::handleMWCommandExecuted()
+{
+    this->ui->actionUndo->setEnabled(!_undoStack.isEmpty());
+    this->ui->actionRedo->setEnabled(!_redoStack.isEmpty());
+}
+
+//private slot
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
+}
+
+//private slot
+void MainWindow::on_actionUndo_triggered()
+{
+    this->undo();
+}
+
+//private slot
+void MainWindow::on_actionRedo_triggered()
+{
+    this->redo();
+}
+
+
+//private
+void MainWindow::doCommand(QSharedPointer<MWCommand> todo)
+{
+    if (todo.isNull())
+        return;
+
+    _redoStack.clear();
+
+    todo->exec();
+    _undoStack.push(todo);
+    this->MWCommandExecuted();
 }

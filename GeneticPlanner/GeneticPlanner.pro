@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     gui/PaletteWidget.cpp \
     EndingTask.cpp \
     NoFlyTask.cpp \
-    TaskAreaObject.cpp
+    TaskAreaObject.cpp \
+    gui/MWCommand.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -45,7 +46,8 @@ HEADERS  += gui/MainWindow.h \
     gui/PaletteWidget.h \
     EndingTask.h \
     NoFlyTask.h \
-    TaskAreaObject.h
+    TaskAreaObject.h \
+    gui/MWCommand.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \
