@@ -28,7 +28,9 @@ SOURCES += main.cpp\
     EndingTask.cpp \
     NoFlyTask.cpp \
     TaskAreaObject.cpp \
-    gui/MWCommand.cpp
+    gui/MWCommand.cpp \
+    gui/PlanningProblemDisplayAdapter.cpp \
+    gui/commands/SetProblemCommand.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -47,7 +49,9 @@ HEADERS  += gui/MainWindow.h \
     EndingTask.h \
     NoFlyTask.h \
     TaskAreaObject.h \
-    gui/MWCommand.h
+    gui/MWCommand.h \
+    gui/PlanningProblemDisplayAdapter.h \
+    gui/commands/SetProblemCommand.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \

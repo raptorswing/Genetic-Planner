@@ -3,16 +3,14 @@
 #include "FlyThroughTask.h"
 #include "EndingTask.h"
 
-PlanningProblem::PlanningProblem(QObject *parent) :
-    QObject(parent)
+PlanningProblem::PlanningProblem()
 {
     _isStartingDefined = false;
     _isEndingDefined = false;
     _endingTask = 0;
 }
 
-PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDefinition &sensorParams,QObject * parent) :
-    QObject(parent)
+PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDefinition &sensorParams)
 {
     this->setUAVSettings(uavParams);
     this->setSensorSettings(sensorParams);
@@ -98,6 +96,11 @@ qreal PlanningProblem::startingAlt() const
     return _startingAlt;
 }
 
+void PlanningProblem::clearStartingPos()
+{
+    _isStartingDefined = false;
+}
+
 bool PlanningProblem::isEndingDefined() const
 {
     return _isEndingDefined;
@@ -111,6 +114,11 @@ QPointF PlanningProblem::endingPos() const
 qreal PlanningProblem::endingAlt() const
 {
     return _endingAlt;
+}
+
+void PlanningProblem::clearEndingPos()
+{
+    _isEndingDefined = false;
 }
 
 void PlanningProblem::setUAVSettings(const UAVParameters &uavParams)
@@ -151,4 +159,63 @@ void PlanningProblem::addTask(PathTask *pathTask, bool secondary)
         _tasks.append(pathTask);
     else
         _secondaryTasks.append(pathTask);
+}
+
+QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
+{
+    stream << problem.uavSettings();
+    stream << problem.sensorSettings();
+
+    stream << problem.isStartingDefined();
+    stream << problem.startingPos();
+    stream << problem.startingAlt();
+
+    stream << problem.isEndingDefined();
+    stream << problem.endingPos();
+    stream << problem.endingAlt();
+
+    return stream;
+}
+
+QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem)
+{
+    UAVParameters uavSettings;
+    stream >> uavSettings;
+
+    SensorDefinition sensorSettings;
+    stream >> sensorSettings;
+
+    bool isStartingDefined;
+    stream >> isStartingDefined;
+
+    QPointF startingPos;
+    stream >> startingPos;
+
+    qreal startingAlt;
+    stream >> startingAlt;
+
+    bool isEndingDefined;
+    stream >> isEndingDefined;
+
+    QPointF endingPos;
+    stream >> endingPos;
+
+    qreal endingAlt;
+    stream >> endingAlt;
+
+    problem.setUAVSettings(uavSettings);
+    problem.setSensorSettings(sensorSettings);
+
+    if (isStartingDefined)
+        problem.setStartingPos(startingPos,startingAlt);
+    else
+        problem.clearStartingPos();
+
+    if (isEndingDefined)
+        problem.setEndingPos(endingPos,endingAlt);
+    else
+        problem.clearEndingPos();
+
+
+    return stream;
 }

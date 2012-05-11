@@ -4,7 +4,7 @@
 #include <QPointF>
 #include <QList>
 #include <QPointer>
-#include <QObject>
+#include <QDataStream>
 
 #include "UAVParameters.h"
 #include "SensorDefinition.h"
@@ -13,14 +13,12 @@
 #include "PolygonObject.h"
 #include "EndingTask.h"
 
-class PlanningProblem : public QObject
+class PlanningProblem
 {
-    Q_OBJECT
 public:
-    PlanningProblem(QObject * parent = 0);
+    PlanningProblem();
     PlanningProblem(const UAVParameters& uavParams,
-                    const SensorDefinition& sensorParams,
-                    QObject * parent = 0);
+                    const SensorDefinition& sensorParams);
     ~PlanningProblem();
 
     bool isReady() const;
@@ -33,10 +31,12 @@ public:
     bool isStartingDefined() const;
     QPointF startingPos() const;
     qreal startingAlt() const;
+    void clearStartingPos();
 
     bool isEndingDefined() const;
     QPointF endingPos() const;
     qreal endingAlt() const;
+    void clearEndingPos();
 
     void setUAVSettings(const UAVParameters& uavParams);
     void setSensorSettings(const SensorDefinition& sensorParams);
@@ -62,5 +62,8 @@ private:
     QList<PathTask *> _secondaryTasks;
     EndingTask * _endingTask;
 };
+
+QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem);
+QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem);
 
 #endif // PLANNINGPROBLEM_H

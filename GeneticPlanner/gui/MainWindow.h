@@ -10,8 +10,7 @@
 #include "MapGraphicsScene.h"
 #include "MapGraphicsView.h"
 #include "CircleObject.h"
-
-#include "PlanningProblem.h"
+#include "PlanningProblemDisplayAdapter.h"
 #include "MWCommand.h"
 
 namespace Ui {
@@ -31,12 +30,10 @@ signals:
 
 private slots:
     void handlePlanningControlStart(qreal desiredFitness);
-    void handlePlanningControlReset();
+    void handlePlanningControlResetRequested();
     void handleStartPointAddRequested();
     void handleEndPointAddRequested();
     void handleTaskAreaAddRequested();
-    void handleStartPositionMarkerPosChanged();
-    void handleEndPositionMarkerPosChanged();
 
     void undo();
     void redo();
@@ -49,21 +46,31 @@ private slots:
 
     void on_actionRedo_triggered();
 
+    void on_actionNew_triggered();
+
+    void on_actionOpen_triggered();
+
+    void on_actionSave_Planning_Problem_triggered();
+
+    void on_actionSave_As_triggered();
+
+    void on_actionClose_triggered();
+
+    void on_actionExport_Solution_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     MapGraphicsScene * _scene;
     MapGraphicsView * _view;
 
-    PlanningProblem _problem;
-
-    QPointer<CircleObject> _startPositionMarker;
-    QPointer<CircleObject> _endPositionMarker;
-    QSet<MapGraphicsObject * > _pathObjects;
+    PlanningProblemDisplayAdapter * _adapter;
 
     void doCommand(QSharedPointer<MWCommand> todo);
     QStack<QSharedPointer<MWCommand> > _undoStack;
     QStack<QSharedPointer<MWCommand> > _redoStack;
+
+    QString _openFile;
 };
 
 #endif // MAINWINDOW_H

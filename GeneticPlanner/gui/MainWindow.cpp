@@ -3,6 +3,9 @@
 
 #include <QtDebug>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QFile>
+#include <QDataStream>
 
 #include "tileSources/CompositeTileSource.h"
 #include "tileSources/OSMTileSource.h"
@@ -15,6 +18,7 @@
 #include "Planner.h"
 #include "PlanningWizard.h"
 #include "NoFlyTask.h"
+#include "gui/commands/SetProblemCommand.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _scene = new MapGraphicsScene(this);
     _view = new MapGraphicsView(_scene,this);
     this->setCentralWidget(_view);
+
+    _adapter = new PlanningProblemDisplayAdapter(PlanningProblem(), _scene, this);
 
     //Setup tile sources for the MapGraphicsView
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource());
@@ -49,10 +55,11 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(handlePlanningControlStart(qreal)));
 
+    //User clicks "reset" on the planning control widget
     connect(this->ui->planningControlWidget,
             SIGNAL(planningClearRequested()),
             this,
-            SLOT(handlePlanningControlReset()));
+            SLOT(handlePlanningControlResetRequested()));
 
     //When the user uses the palette to request adding an end point
     connect(this->ui->paletteWidget,
@@ -72,6 +79,12 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(handleTaskAreaAddRequested()));
 
+    //Update the state of the undo/redo buttons based on the state of the stacks when we do commands
+    connect(this,
+            SIGNAL(MWCommandExecuted()),
+            this,
+            SLOT(handleMWCommandExecuted()));
+
     //Spawn a helpful wizard!
     /*
     PlanningWizard * wizard = new PlanningWizard(this);
@@ -90,74 +103,29 @@ MainWindow::~MainWindow()
 //private slot
 void MainWindow::handlePlanningControlStart(qreal desiredFitness)
 {
-    if (!_problem.isReady())
-    {
-        QMessageBox::information(this,
-                                 "Cannot Plan - Problem is incomplete",
-                                 "Planning cannot begin until you provide enough information");
-        this->ui->planningControlWidget->setIsPlanningRunning(false);
-        return;
-    }
-
-    Planner planner;
-    Individual result = planner.plan(&_problem, desiredFitness);
-
-    QList<QPointF> geo = result.generateGeoPoints(_problem.startingPos());
-
-    foreach(QPointF pos, geo)
-    {
-        CircleObject * circle = new CircleObject(3.0,false,Qt::yellow);
-        _scene->addObject(circle);
-        circle->setPos(pos);
-        _pathObjects.insert(circle);
-    }
-
-    this->ui->planningControlWidget->setIsPlanningRunning(false);
 }
 
 //private slot
-void MainWindow::handlePlanningControlReset()
+void MainWindow::handlePlanningControlResetRequested()
 {
-    foreach(MapGraphicsObject * obj, _pathObjects)
-    {
-        obj->deleteLater();
-    }
-    _pathObjects.clear();
 }
 
 //private slot
 void MainWindow::handleStartPointAddRequested()
-{
-    if (_startPositionMarker.isNull())
-    {
-        _startPositionMarker = new CircleObject(6.0,true,Qt::green);
-        _scene->addObject(_startPositionMarker);
-        connect(_startPositionMarker.data(),
-                SIGNAL(posChanged()),
-                this,
-                SLOT(handleStartPositionMarkerPosChanged()));
-    }
-    _startPositionMarker->setPos(_view->center());
+{    
+    _adapter->setStartPosition(_view->center(),1500);
 }
 
 //private slot
 void MainWindow::handleEndPointAddRequested()
 {
-    if (_endPositionMarker.isNull())
-    {
-        _endPositionMarker = new CircleObject(6.0,true,Qt::red);
-        _scene->addObject(_endPositionMarker);
-        connect(_endPositionMarker.data(),
-                SIGNAL(posChanged()),
-                this,
-                SLOT(handleEndPositionMarkerPosChanged()));
-    }
-    _endPositionMarker->setPos(_view->center());
+    _adapter->setEndPosition(_view->center(),1500);
 }
 
 //private slot
 void MainWindow::handleTaskAreaAddRequested()
 {
+    /*
     const qreal degrees = 0.001;
     QPointF topLeft = _view->center() + QPointF(-1*degrees,degrees);
     QPointF topRight = _view->center() + QPointF(degrees,degrees);
@@ -167,18 +135,7 @@ void MainWindow::handleTaskAreaAddRequested()
     geoPoly << topLeft << topRight << bottomRight << bottomLeft;
     TaskAreaObject * obj = new TaskAreaObject(geoPoly);
     _scene->addObject(obj);
-}
-
-//private slot
-void MainWindow::handleStartPositionMarkerPosChanged()
-{
-    _problem.setStartingPos(_startPositionMarker->pos());
-}
-
-//private slot
-void MainWindow::handleEndPositionMarkerPosChanged()
-{
-    _problem.setEndingPos(_endPositionMarker->pos());
+    */
 }
 
 //private slot
@@ -230,6 +187,107 @@ void MainWindow::on_actionRedo_triggered()
     this->redo();
 }
 
+//private slot
+void MainWindow::on_actionNew_triggered()
+{
+    //Another great place to ask them if they want to save their current doc
+    _adapter->setPlanningProblem(PlanningProblem());
+
+    _openFile.clear();
+}
+
+//private slot
+void MainWindow::on_actionOpen_triggered()
+{
+    QString fileToReadPath = QFileDialog::getOpenFileName(this,
+                                                          "Select Problem File",
+                                                          QString(),
+                                                          "*.planningprob");
+    if (fileToReadPath.isEmpty())
+        return;
+
+    QFile fp(fileToReadPath);
+    if (!fp.exists())
+    {
+        QMessageBox::warning(this,
+                             "Non-existant file",
+                             "Failed to locate " + fp.fileName() + " for reading");
+        return;
+    }
+
+    if (!fp.open(QFile::ReadOnly))
+    {
+        QMessageBox::warning(this,
+                             "Failed to open file",
+                             "Failed to open " + fp.fileName() + " for reading");
+        return;
+    }
+
+    QDataStream stream(&fp);
+    PlanningProblem toRead;
+    stream >> toRead;
+
+    _adapter->setPlanningProblem(toRead);
+
+    _openFile = fileToReadPath;
+
+    QMessageBox::information(this,
+                             "Success",
+                             "Loaded file successfully");
+}
+
+//private slot
+void MainWindow::on_actionSave_Planning_Problem_triggered()
+{
+    if (_openFile.isEmpty())
+    {
+        this->on_actionSave_As_triggered();
+        return;
+    }
+
+    QFile fp(_openFile);
+    if (!fp.open(QFile::WriteOnly | QFile::Truncate))
+    {
+        QMessageBox::warning(this,
+                             "Failed to open save file",
+                             "Failed to open " + fp.fileName() + " for writing. File not saved");
+        return;
+    }
+
+    QDataStream stream(&fp);
+    stream << _adapter->planningProblem();
+
+    QMessageBox::information(this,
+                             "Success",
+                             "Saved file successfully");
+}
+
+//private slot
+void MainWindow::on_actionSave_As_triggered()
+{
+    QString destFile = QFileDialog::getSaveFileName(this,
+                                                    "Select save file",
+                                                    QString(),
+                                                    "*.planningprob");
+    if (destFile.isEmpty())
+        return;
+    _openFile = destFile;
+    this->on_actionSave_Planning_Problem_triggered();
+}
+
+//private slot
+void MainWindow::on_actionClose_triggered()
+{
+    //This would be a great place to ask if they want to save
+    _adapter->setPlanningProblem(PlanningProblem());
+    _openFile.clear();
+}
+
+//private slot
+void MainWindow::on_actionExport_Solution_triggered()
+{
+
+}
 
 //private
 void MainWindow::doCommand(QSharedPointer<MWCommand> todo)
@@ -237,6 +295,7 @@ void MainWindow::doCommand(QSharedPointer<MWCommand> todo)
     if (todo.isNull())
         return;
 
+    //Anything in the redo stack is now invalidated
     _redoStack.clear();
 
     todo->exec();
