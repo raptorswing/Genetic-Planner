@@ -180,3 +180,9 @@ void MainWindow::handleEndPositionMarkerPosChanged()
 {
     _problem.setEndingPos(_endPositionMarker->pos());
 }
+
+//private slot
+void MainWindow::on_actionExit_triggered()
+{
+    this->close();
+}

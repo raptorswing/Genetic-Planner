@@ -32,6 +32,8 @@ private slots:
     void handleStartPositionMarkerPosChanged();
     void handleEndPositionMarkerPosChanged();
     
+    void on_actionExit_triggered();
+
 private:
     Ui::MainWindow *ui;
 
