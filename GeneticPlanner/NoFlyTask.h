@@ -1,7 +1,7 @@
 #ifndef NOFLYTASK_H
 #define NOFLYTASK_H
 
-#include <QPointer>
+#include <QPolygonF>
 
 #include "PathTask.h"
 #include "PolygonObject.h"
@@ -9,12 +9,12 @@
 class NoFlyTask : public PathTask
 {
 public:
-    NoFlyTask(PolygonObject * polyObj);
+    NoFlyTask(QPolygonF geoPoly);
 
     virtual qreal performance(const QList<QPointF>& positions);
 
 private:
-    QPointer<PolygonObject> _polyObj;
+    QPolygonF _geoPoly;
 };
 
 #endif // NOFLYTASK_H
