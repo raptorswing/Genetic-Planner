@@ -22,6 +22,17 @@ PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDef
     _endingTask = 0;
 }
 
+PlanningProblem::~PlanningProblem()
+{
+    foreach(PathTask * task, _tasks)
+        delete task;
+    _tasks.clear();
+
+    foreach(PathTask * task, _secondaryTasks)
+        delete task;
+    _secondaryTasks.clear();
+}
+
 bool PlanningProblem::isReady() const
 {
     return (this->isStartingDefined());
@@ -125,9 +136,10 @@ void PlanningProblem::setEndingPos(QPointF endingPos, qreal endingAlt)
     _endingAlt = endingAlt;
     _isEndingDefined = true;
 
-    if (_endingTask)
-        delete _endingTask;
-    _endingTask = new EndingTask(endingPos,15.0);
+    if (!_endingTask)
+        _endingTask = new EndingTask(endingPos,15.0);
+    else
+        _endingTask->setEndingPos(endingPos);
 }
 
 void PlanningProblem::addTask(PathTask *pathTask, bool secondary)

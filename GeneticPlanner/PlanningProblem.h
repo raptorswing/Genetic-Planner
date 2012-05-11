@@ -11,6 +11,7 @@
 #include "Individual.h"
 #include "PathTask.h"
 #include "PolygonObject.h"
+#include "EndingTask.h"
 
 class PlanningProblem : public QObject
 {
@@ -20,6 +21,7 @@ public:
     PlanningProblem(const UAVParameters& uavParams,
                     const SensorDefinition& sensorParams,
                     QObject * parent = 0);
+    ~PlanningProblem();
 
     bool isReady() const;
 
@@ -58,7 +60,7 @@ private:
 
     QList<PathTask *> _tasks;
     QList<PathTask *> _secondaryTasks;
-    PathTask * _endingTask;
+    EndingTask * _endingTask;
 };
 
 #endif // PLANNINGPROBLEM_H

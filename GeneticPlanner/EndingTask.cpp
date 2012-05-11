@@ -25,3 +25,8 @@ qreal EndingTask::performance(const QList<QPointF> &positions)
 
     return qMin<qreal>(500.0,goalScore);
 }
+
+void EndingTask::setEndingPos(QPointF endingPos)
+{
+    _endingPos = endingPos;
+}
