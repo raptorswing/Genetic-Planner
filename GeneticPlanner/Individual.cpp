@@ -20,6 +20,37 @@ Individual::Individual()
     _utilityComputed = false;
 }
 
+Individual::Individual(const Individual &A)
+{
+    _yawActions = A.yawActions();
+    _utilityComputed = A._utilityComputed;
+    _utility = A._utility;
+}
+
+Individual::Individual(const Individual &A, int toModify)
+{
+    _yawActions = A.yawActions();
+    _utilityComputed = false;
+
+    if (toModify <= 0)
+        return;
+
+    if (qrand() % 2)
+    {
+        for (int i = 0; i < toModify && _yawActions.size() <= MAX_ACTIONS; i++)
+        {
+            _yawActions.append(this->randomYawAction());
+        }
+    }
+    else
+    {
+        for (int i = 0; i < toModify && _yawActions.size() >= 2; i++)
+        {
+            _yawActions.removeAt(qrand() % _yawActions.size());
+        }
+    }
+}
+
 Individual::Individual(const Individual &A, const Individual &B)
 {
     int aSize = A._yawActions.size();

@@ -25,6 +25,15 @@ public:
     Individual();
 
     /*!
+     \brief Copy Constructor
+
+     \param A
+    */
+    Individual(const Individual& A);
+
+    Individual(const Individual& A, int toModify);
+
+    /*!
      \brief Creates an Individual that is a "child" of Individuals A and B
 
      \param A
