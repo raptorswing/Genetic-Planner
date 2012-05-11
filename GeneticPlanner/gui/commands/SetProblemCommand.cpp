@@ -1,18 +1,26 @@
 #include "SetProblemCommand.h"
 
+#include "gui/PlanningProblemDisplayAdapter.h"
+
 SetProblemCommand::SetProblemCommand(const PlanningProblem& newProblem, PlanningProblemDisplayAdapter * adapter) :
-    _newProblem(newProblem), _adapter(adapter)
+    _newProblem(newProblem), _oldProblemSet(false), _adapter(adapter)
+{
+}
+
+SetProblemCommand::SetProblemCommand(const PlanningProblem &newProblem, const PlanningProblem &oldProblem, PlanningProblemDisplayAdapter *adapter) :
+    _newProblem(newProblem), _oldProblemSet(true), _oldProblem(oldProblem), _adapter(adapter)
 {
 }
 
 void SetProblemCommand::exec()
 {
-    PlanningProblem oldProblem = _adapter->planningProblem();
+    if (!_oldProblemSet)
+        _oldProblem = _adapter->planningProblem();
+
     _adapter->setPlanningProblem(_newProblem);
-    _newProblem = oldProblem;
 }
 
 void SetProblemCommand::unExec()
 {
-    this->exec();
+    _adapter->setPlanningProblem(_oldProblem);
 }
