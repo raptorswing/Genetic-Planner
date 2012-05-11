@@ -8,13 +8,14 @@
 class FlyThroughTask : public PathTask
 {
 public:
-    FlyThroughTask(QPointF flyThroughPoint, qreal withinDistance = 30.0);
+    FlyThroughTask(QPointF flyThroughPoint, qreal flyThroughAlt, qreal withinDistance = 30.0);
     virtual ~FlyThroughTask();
 
     virtual qreal performance(const QList<QPointF>& positions);
 
 private:
     QPointF _flyThroughPoint;
+    qreal _flyThroughAlt;
     qreal _stdDev;
 };
 

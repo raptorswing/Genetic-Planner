@@ -2,8 +2,8 @@
 
 #include "guts/Conversions.h"
 
-FlyThroughTask::FlyThroughTask(QPointF flyThroughPoint, qreal withinDistance) :
-    _flyThroughPoint(flyThroughPoint), _stdDev(withinDistance)
+FlyThroughTask::FlyThroughTask(QPointF flyThroughPoint, qreal flyThroughAlt, qreal withinDistance) :
+    _flyThroughPoint(flyThroughPoint), _flyThroughAlt(flyThroughAlt), _stdDev(withinDistance)
 {
 }
 
@@ -23,8 +23,8 @@ qreal FlyThroughTask::performance(const QList<QPointF> &positions)
 
     foreach(QPointF geoPos, positions)
     {
-        QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),1409,
-                                                goalPoint.y(),goalPoint.x(),1409);
+        QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),_flyThroughAlt,
+                                                goalPoint.y(),goalPoint.x(),_flyThroughAlt);
         qreal dist = enuPos.length();
 
         if (dist < stdDev)

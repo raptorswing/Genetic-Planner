@@ -4,8 +4,8 @@
 
 #include "guts/Conversions.h"
 
-EndingTask::EndingTask(const QPointF &endingPos, qreal withinDistance) :
-    _endingPos(endingPos), _stdDev(withinDistance)
+EndingTask::EndingTask(const QPointF &endingPos, const qreal& endingAlt, qreal withinDistance) :
+    _endingPos(endingPos), _endingAlt(endingAlt), _stdDev(withinDistance)
 {
 }
 
@@ -14,8 +14,8 @@ qreal EndingTask::performance(const QList<QPointF> &positions)
     qreal goalScore = 0.0;
     const QPointF goalPoint = _endingPos;
     const QPointF geoPos = positions.last();
-    QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),1409,
-                                            goalPoint.y(),goalPoint.x(),1409);
+    QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),_endingAlt,
+                                            goalPoint.y(),goalPoint.x(),_endingAlt);
     qreal dist = enuPos.length();
 
     if (dist < _stdDev)

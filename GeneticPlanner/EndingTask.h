@@ -6,7 +6,7 @@
 class EndingTask : public PathTask
 {
 public:
-    EndingTask(const QPointF& endingPos, qreal withinDistance=30.0);
+    EndingTask(const QPointF& endingPos, const qreal& endingAlt, qreal withinDistance=30.0);
 
     virtual qreal performance(const QList<QPointF>& positions);
 
@@ -14,6 +14,7 @@ public:
 
 private:
     QPointF _endingPos;
+    qreal _endingAlt;
     qreal _stdDev;
 };
 
