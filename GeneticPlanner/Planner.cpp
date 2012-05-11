@@ -27,9 +27,9 @@ Individual Planner::plan(PlanningProblem *problem, int generations)
     const int keepCount = 25;
 
     //Must be at least mutantCount
-    const int generationSize = mutantCount + breedCount;
+    //const int generationSize = mutantCount + breedCount;
 
-    qreal desiredBest = 3000;
+    qreal desiredBest = 30000;
     qreal bestSoFar = 0.0;
     for (int g = 0; g < generations ; g++)
     {
@@ -50,11 +50,19 @@ Individual Planner::plan(PlanningProblem *problem, int generations)
 
         //Create some mutants
         //while (genePool.size() < generationSize)
-        for (int i = 0; i < generationSize; i++)
+        for (int i = 0; i < mutantCount; i++)
         {
             Individual * newIndividual = new Individual();
             newIndividuals.append(newIndividual);
         }
+
+
+        for (int i = 0; i < 5 && genePool.size() > 0; i++)
+        {
+            Individual * newIndividual = new Individual(*genePool.values()[qrand() % genePool.size()], 2);
+            newIndividuals.append(newIndividual);
+        }
+
 
         //Rank all the new individuals
         QThreadPool * pool = QThreadPool::globalInstance();
