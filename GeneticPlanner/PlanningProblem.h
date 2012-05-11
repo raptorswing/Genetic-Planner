@@ -42,7 +42,7 @@ public:
     void setStartingPos(QPointF startingPos,qreal startingAlt=1423);
     void setEndingPos(QPointF endingPos, qreal endingAlt=1423);
 
-    void addTask(PathTask * pathTask);
+    void addTask(PathTask * pathTask,bool secondary=false);
 
 private:
     UAVParameters _uavSettings;
@@ -57,6 +57,7 @@ private:
     qreal _endingAlt;
 
     QList<PathTask *> _tasks;
+    QList<PathTask *> _secondaryTasks;
     PathTask * _endingTask;
 };
 

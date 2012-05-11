@@ -47,12 +47,17 @@ qreal PlanningProblem::fitness(const Individual &individual)
     }
 
     //Punish long paths
-    /*
     {
         qreal shortReward = 10 * toRet / geoPositions.length();
         toRet += shortReward;
     }
+
+    /*
+      We add reward for secondary tasks after the "long path punishment" to avoid amplifying reward from
+      simply not flying somewhere.
     */
+    foreach(PathTask * task, _secondaryTasks)
+        toRet += task->performance(geoPositions);
 
     return toRet;
 }
@@ -125,7 +130,13 @@ void PlanningProblem::setEndingPos(QPointF endingPos, qreal endingAlt)
     _endingTask = new EndingTask(endingPos,15.0);
 }
 
-void PlanningProblem::addTask(PathTask *pathTask)
+void PlanningProblem::addTask(PathTask *pathTask, bool secondary)
 {
-    _tasks.append(pathTask);
+    if (!pathTask)
+        return;
+
+    if (!secondary)
+        _tasks.append(pathTask);
+    else
+        _secondaryTasks.append(pathTask);
 }
