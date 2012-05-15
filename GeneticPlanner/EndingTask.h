@@ -10,6 +10,8 @@ public:
 
     virtual qreal performance(const QList<QPointF>& positions);
 
+    virtual QString taskType() const;
+
     void setEndingPos(QPointF endingPos);
 
 private:

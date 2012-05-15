@@ -12,6 +12,7 @@ public:
     virtual ~PathTask();
 
     virtual qreal performance(const QList<QPointF>& positions)=0;
+    virtual QString taskType() const=0;
 
 protected:
     static qreal normal(qreal x, qreal stdDev,qreal scaleFactor=1000.0);

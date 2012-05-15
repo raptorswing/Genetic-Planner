@@ -42,3 +42,8 @@ qreal FlyThroughTask::performance(const QList<QPointF> &positions)
 
     return goalScore;
 }
+
+QString FlyThroughTask::taskType() const
+{
+    return "FlyThrough";
+}

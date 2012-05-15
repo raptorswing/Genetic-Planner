@@ -27,3 +27,8 @@ qreal NoFlyTask::performance(const QList<QPointF> &positions)
 
     return goalScore;
 }
+
+QString NoFlyTask::taskType() const
+{
+    return "NoFly";
+}

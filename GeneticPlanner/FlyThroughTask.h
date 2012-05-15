@@ -13,6 +13,8 @@ public:
 
     virtual qreal performance(const QList<QPointF>& positions);
 
+    virtual QString taskType() const;
+
 private:
     QPointF _flyThroughPoint;
     qreal _flyThroughAlt;

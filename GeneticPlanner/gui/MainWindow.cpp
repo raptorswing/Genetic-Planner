@@ -125,6 +125,7 @@ void MainWindow::handleEndPointAddRequested()
 //private slot
 void MainWindow::handleTaskAreaAddRequested()
 {
+    _adapter->addArea(_view->center());
     /*
     const qreal degrees = 0.001;
     QPointF topLeft = _view->center() + QPointF(-1*degrees,degrees);

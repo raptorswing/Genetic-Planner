@@ -4,9 +4,11 @@
 #include <QObject>
 #include <QPointF>
 #include <QPointer>
+#include <QHash>
 
 #include "MapGraphicsScene.h"
 #include "PlanningProblem.h"
+class TaskAreaObject;
 
 class PlanningProblemDisplayAdapter : public QObject
 {
@@ -25,9 +27,14 @@ public slots:
     void setEndPosition(const QPointF& geoPos, const qreal& altitude);
     void removeEndPosition();
 
+    void addArea(const QPointF& center);
+    void addArea(const QPolygonF& poly);
+
 private slots:
     void handleStartPositionObjectPosChanged();
     void handleEndPositionObjectPosChanged();
+    void handleAreaChanged();
+    void handleAreaDestroyed();
 
 private:
     PlanningProblem _problem;
@@ -35,6 +42,8 @@ private:
 
     QPointer<MapGraphicsObject> _startPositionObject;
     QPointer<MapGraphicsObject> _endPositionObject;
+
+    QHash<TaskAreaObject *, QPolygonF> _areas;
     
 };
 

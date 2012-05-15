@@ -3,6 +3,8 @@
 #include "FlyThroughTask.h"
 #include "EndingTask.h"
 
+#include <QtDebug>
+
 PlanningProblem::PlanningProblem()
 {
     _isStartingDefined = false;
@@ -161,6 +163,29 @@ void PlanningProblem::addTask(PathTask *pathTask, bool secondary)
         _secondaryTasks.append(pathTask);
 }
 
+void PlanningProblem::addArea(const QPolygonF &geoPoly)
+{
+    _areas.insert(geoPoly);
+    if (!_areas.contains(geoPoly))
+        qWarning() << "Insertion of" << geoPoly << "failed";
+}
+
+void PlanningProblem::setAreas(const QSet<QPolygonF> &toSet)
+{
+    _areas = toSet;
+}
+
+void PlanningProblem::removeArea(const QPolygonF &toRemove)
+{
+    if (!_areas.remove(toRemove))
+        qWarning() << this << "failed to remove area" << toRemove << ". Size is now" << _areas.size();
+}
+
+QSet<QPolygonF> PlanningProblem::areas() const
+{
+    return _areas;
+}
+
 QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
 {
     stream << problem.uavSettings();
@@ -173,6 +198,9 @@ QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
     stream << problem.isEndingDefined();
     stream << problem.endingPos();
     stream << problem.endingAlt();
+
+    stream << problem.areas();
+
 
     return stream;
 }
@@ -216,6 +244,43 @@ QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem)
     else
         problem.clearEndingPos();
 
+    QSet<QPolygonF> areas;
+    stream >> areas;
+    problem.setAreas(areas);
+
 
     return stream;
+}
+
+bool operator==(const QPolygonF& A, const QPolygonF& B)
+{
+    if (A.size() != B.size())
+        return false;
+
+    for (int i = 0; i < A.size(); i++)
+    {
+        QPointF a = A[i];
+        QPointF b = B[i];
+        if (a != b)
+            return false;
+    }
+
+    return true;
+}
+
+bool operator!=(const QPolygonF& A, const QPolygonF& B)
+{
+    return !(A == B);
+}
+
+uint qHash(const QPolygonF& poly)
+{
+    uint toRet = 0;
+
+    for (int i = 0; i < poly.size(); i++)
+    {
+        const QPointF& pos = poly.at(i);
+        toRet ^= qRound(pos.x() + pos.y());
+    }
+    return toRet;
 }
