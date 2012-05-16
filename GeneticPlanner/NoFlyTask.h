@@ -15,6 +15,8 @@ public:
 
     virtual QString taskType() const;
 
+    virtual QSharedPointer<PathTask> copy() const;
+
 private:
     QPolygonF _geoPoly;
 };

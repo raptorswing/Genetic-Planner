@@ -43,6 +43,13 @@ qreal FlyThroughTask::performance(const QList<QPointF> &positions)
     return goalScore;
 }
 
+QSharedPointer<PathTask> FlyThroughTask::copy() const
+{
+    return QSharedPointer<PathTask>(new FlyThroughTask(_flyThroughPoint,
+                                                       _flyThroughAlt,
+                                                       _stdDev));
+}
+
 QString FlyThroughTask::taskType() const
 {
     return "FlyThrough";

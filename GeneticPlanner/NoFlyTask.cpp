@@ -32,3 +32,8 @@ QString NoFlyTask::taskType() const
 {
     return "NoFly";
 }
+
+QSharedPointer<PathTask> NoFlyTask::copy() const
+{
+    return QSharedPointer<PathTask>(new NoFlyTask(_geoPoly));
+}

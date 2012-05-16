@@ -12,6 +12,8 @@ public:
 
     virtual QString taskType() const;
 
+    virtual QSharedPointer<PathTask> copy() const;
+
     void setEndingPos(QPointF endingPos);
 
 private:

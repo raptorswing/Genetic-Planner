@@ -13,6 +13,8 @@ public:
 
     virtual qreal performance(const QList<QPointF>& positions);
 
+    virtual QSharedPointer<PathTask> copy() const;
+
     virtual QString taskType() const;
 
 private:

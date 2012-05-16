@@ -31,6 +31,13 @@ QString EndingTask::taskType() const
     return "Ending";
 }
 
+QSharedPointer<PathTask> EndingTask::copy() const
+{
+    return QSharedPointer<PathTask>(new EndingTask(_endingPos,
+                                                   _endingAlt,
+                                                   _stdDev));
+}
+
 void EndingTask::setEndingPos(QPointF endingPos)
 {
     _endingPos = endingPos;
