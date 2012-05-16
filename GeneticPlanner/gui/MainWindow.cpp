@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setCentralWidget(_view);
 
     _adapter = new PlanningProblemDisplayAdapter(PlanningProblem(), _scene, this);
+    _planner = new Planner(_adapter->planningProblem(),this);
 
     //Setup tile sources for the MapGraphicsView
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource());
@@ -42,18 +43,26 @@ MainWindow::MainWindow(QWidget *parent) :
     _view->setTileSource(composite);
 
     //Zoom into BYU campus by default
+    /*
     QPointF place(-111.649253,40.249707);
     _view->setZoomLevel(15);
     _view->centerOn(place);
+    */
 
     //Provide our "map layers" dock widget with the composite tile source to be configured
     this->ui->mapLayersWidget->setComposite(composite);
 
     //When the user clicks "start planning" on the control widget, we want to start planning
     connect(this->ui->planningControlWidget,
-            SIGNAL(planningStartRequested(qreal)),
+            SIGNAL(planningStartRequested()),
             this,
-            SLOT(handlePlanningControlStart(qreal)));
+            SLOT(handlePlanningControlStartRequested()));
+
+    //When the user clicks "pause"
+    connect(this->ui->planningControlWidget,
+            SIGNAL(planningPauseRequested()),
+            this,
+            SLOT(handlePlanningControlPauseRequested()));
 
     //User clicks "reset" on the planning control widget
     connect(this->ui->planningControlWidget,
@@ -85,6 +94,27 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(handleMWCommandExecuted()));
 
+    connect(_planner,
+            SIGNAL(planningStarted()),
+            this->ui->planningControlWidget,
+            SLOT(setIsRunning()));
+    connect(_planner,
+            SIGNAL(planningPaused()),
+            this->ui->planningControlWidget,
+            SLOT(setIsPaused()));
+    connect(_planner,
+            SIGNAL(planningFinished()),
+            this->ui->planningControlWidget,
+            SLOT(setIsStopped()));
+    connect(_planner,
+            SIGNAL(iterationFinished(int,qreal)),
+            this->ui->planningControlWidget,
+            SLOT(setPlanningProgress(int,qreal)));
+    connect(_adapter,
+            SIGNAL(problemHasChanged()),
+            _planner,
+            SLOT(clearPlanning()));
+
     //Spawn a helpful wizard!
     /*
     PlanningWizard * wizard = new PlanningWizard(this);
@@ -101,13 +131,32 @@ MainWindow::~MainWindow()
 }
 
 //private slot
-void MainWindow::handlePlanningControlStart(qreal desiredFitness)
+void MainWindow::handlePlanningControlStartRequested()
 {
+    if (!_adapter->planningProblem().isReady())
+    {
+        QMessageBox::information(this,
+                                 "Can't plan - Problem not defined",
+                                 "You need to provide more information to the planner. Have you defined a start position?");
+        return;
+    }
+    qDebug() << "Start requested";
+    _planner->setProblem(_adapter->planningProblem());
+    _planner->startPlanning();
+}
+
+//private slot
+void MainWindow::handlePlanningControlPauseRequested()
+{
+    qDebug() << "Pause requested";
+    _planner->pausePlanning();
 }
 
 //private slot
 void MainWindow::handlePlanningControlResetRequested()
 {
+    qDebug() << "Reset requested";
+    _planner->clearPlanning();
 }
 
 //private slot
@@ -126,17 +175,6 @@ void MainWindow::handleEndPointAddRequested()
 void MainWindow::handleTaskAreaAddRequested()
 {
     _adapter->addArea(_view->center());
-    /*
-    const qreal degrees = 0.001;
-    QPointF topLeft = _view->center() + QPointF(-1*degrees,degrees);
-    QPointF topRight = _view->center() + QPointF(degrees,degrees);
-    QPointF bottomLeft = _view->center() + QPointF(-1*degrees,-1*degrees);
-    QPointF bottomRight = _view->center() + QPointF(degrees,-1*degrees);
-    QPolygonF geoPoly;
-    geoPoly << topLeft << topRight << bottomRight << bottomLeft;
-    TaskAreaObject * obj = new TaskAreaObject(geoPoly);
-    _scene->addObject(obj);
-    */
 }
 
 //private slot
@@ -235,6 +273,13 @@ void MainWindow::on_actionOpen_triggered()
     QMessageBox::information(this,
                              "Success",
                              "Loaded file successfully");
+
+    if (_adapter->planningProblem().isStartingDefined())
+    {
+        if (_view->zoomLevel() < 10)
+            _view->setZoomLevel(15);
+        _view->centerOn(_adapter->planningProblem().startingPos());
+    }
 }
 
 //private slot

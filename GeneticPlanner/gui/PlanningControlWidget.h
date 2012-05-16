@@ -10,24 +10,36 @@ class PlanningControlWidget;
 class PlanningControlWidget : public QWidget
 {
     Q_OBJECT
-    
+public:
+    enum PlanningStatus
+    {
+        Stopped,
+        Running,
+        Paused
+    };
+
 public:
     explicit PlanningControlWidget(QWidget *parent = 0);
     ~PlanningControlWidget();
 
-    void setIsPlanningRunning(bool);
+public slots:
+    void setPlanningState(PlanningStatus);
+    void setPlanningProgress(int iteration, qreal fitness);
+    void setIsPaused();
+    void setIsStopped();
+    void setIsRunning();
 
 signals:
-    void planningStartRequested(qreal desiredFitness);
+    void planningStartRequested();
     void planningPauseRequested();
     void planningClearRequested();
     
 private slots:
     void on_resetButton_clicked();
 
-    void on_planResumeButton_toggled();
+    void on_planButton_clicked();
 
-    void on_desiredFitnessSpinBox_valueChanged(double arg1);
+    void on_pauseButton_clicked();
 
 private:
     Ui::PlanningControlWidget *ui;

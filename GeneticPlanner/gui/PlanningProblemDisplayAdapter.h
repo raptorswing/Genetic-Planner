@@ -20,6 +20,7 @@ public:
     PlanningProblem planningProblem() const;
     
 signals:
+    void problemHasChanged();
     
 public slots:
     void setStartPosition(const QPointF& geoPos, const qreal& altitude);
@@ -37,6 +38,7 @@ private slots:
     void handleAreaDestroyed();
 
 private:
+    void clear();
     PlanningProblem _problem;
     MapGraphicsScene * _mgScene;
 

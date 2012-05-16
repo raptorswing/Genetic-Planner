@@ -3,7 +3,7 @@
 #include "PlanningProblem.h"
 #include "Individual.h"
 
-FitnessRunnable::FitnessRunnable(PlanningProblem * problem,Individual *individual) :
+FitnessRunnable::FitnessRunnable(PlanningProblem * problem,QSharedPointer<Individual> individual) :
     _problem(problem), _individual(individual)
 {
     this->setAutoDelete(false);
@@ -11,7 +11,7 @@ FitnessRunnable::FitnessRunnable(PlanningProblem * problem,Individual *individua
 
 void FitnessRunnable::run()
 {
-    _result = _problem->fitness(*_individual);
+    _result = _problem->fitness(_individual);
 }
 
 qreal FitnessRunnable::result() const

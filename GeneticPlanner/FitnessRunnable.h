@@ -2,6 +2,7 @@
 #define FITNESSRUNNABLE_H
 
 #include <QRunnable>
+#include <QSharedPointer>
 
 #include "PlanningProblem.h"
 #include "Individual.h"
@@ -9,7 +10,7 @@
 class FitnessRunnable : public QRunnable
 {
 public:
-    FitnessRunnable(PlanningProblem * problem,Individual * individual);
+    FitnessRunnable(PlanningProblem * problem, QSharedPointer<Individual> individual);
 
     virtual void run();
 
@@ -17,7 +18,7 @@ public:
 
 private:
     PlanningProblem * _problem;
-    Individual * _individual;
+    QSharedPointer<Individual> _individual;
     qreal _result;
 };
 

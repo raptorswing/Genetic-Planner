@@ -9,7 +9,6 @@ PlanningProblem::PlanningProblem()
 {
     _isStartingDefined = false;
     _isEndingDefined = false;
-    _endingTask = 0;
 }
 
 PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDefinition &sensorParams)
@@ -19,18 +18,39 @@ PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDef
 
     _isStartingDefined = false;
     _isEndingDefined = false;
-    _endingTask = 0;
+}
+
+PlanningProblem::PlanningProblem(const PlanningProblem &other)
+{
+    _isStartingDefined = false;
+    _isEndingDefined = false;
+
+
+    //Starting and end position
+    if (other.isStartingDefined())
+        this->setStartingPos(other.startingPos(),other.startingAlt());
+
+    //The ending point will define the ending task for us, too
+    if (other.isEndingDefined())
+        this->setEndingPos(other.endingPos(),other.endingAlt());
+
+    //UAV and sensor settings
+    this->setUAVSettings(other.uavSettings());
+    this->setSensorSettings(other.sensorSettings());
+
+    //Copy Tasks
+    foreach(QSharedPointer<PathTask> task, other.tasks())
+        this->addTask(task->copy());
+    foreach(QSharedPointer<PathTask> task, other.secondaryTasks())
+        this->addTask(task->copy(),true);
+
+    //Areas
+    _areas = other.areas();
 }
 
 PlanningProblem::~PlanningProblem()
 {
-    foreach(PathTask * task, _tasks)
-        delete task;
-    _tasks.clear();
 
-    foreach(PathTask * task, _secondaryTasks)
-        delete task;
-    _secondaryTasks.clear();
 }
 
 bool PlanningProblem::isReady() const
@@ -38,7 +58,7 @@ bool PlanningProblem::isReady() const
     return (this->isStartingDefined());
 }
 
-qreal PlanningProblem::fitness(const Individual &individual)
+qreal PlanningProblem::fitness(QSharedPointer<Individual> individual)
 {
     if (!this->isReady())
         return 0.0;
@@ -46,16 +66,14 @@ qreal PlanningProblem::fitness(const Individual &individual)
     qreal toRet = 0.0;
 
     //Get the geo points of the path and run them all through our tasks!
-    QList<QPointF> geoPositions = individual.generateGeoPoints(this->startingPos());
+    QList<QPointF> geoPositions = individual->generateGeoPoints(this->startingPos());
 
-    foreach(PathTask * task, _tasks)
+    foreach(QSharedPointer<PathTask> task, _tasks)
         toRet += task->performance(geoPositions);
 
     //Do the "ending task" if applicable
     if (_endingTask)
-    {
         toRet += _endingTask->performance(geoPositions);
-    }
 
     //Punish long paths
     {
@@ -67,7 +85,7 @@ qreal PlanningProblem::fitness(const Individual &individual)
       We add reward for secondary tasks after the "long path punishment" to avoid amplifying reward from
       simply not flying somewhere.
     */
-    foreach(PathTask * task, _secondaryTasks)
+    foreach(QSharedPointer<PathTask> task, _secondaryTasks)
         toRet += task->performance(geoPositions);
 
     return toRet;
@@ -121,6 +139,7 @@ qreal PlanningProblem::endingAlt() const
 void PlanningProblem::clearEndingPos()
 {
     _isEndingDefined = false;
+    _endingTask.clear();
 }
 
 void PlanningProblem::setUAVSettings(const UAVParameters &uavParams)
@@ -146,13 +165,13 @@ void PlanningProblem::setEndingPos(QPointF endingPos, qreal endingAlt)
     _endingAlt = endingAlt;
     _isEndingDefined = true;
 
-    if (!_endingTask)
-        _endingTask = new EndingTask(endingPos,15.0);
+    if (_endingTask.isNull())
+        _endingTask = QSharedPointer<EndingTask>(new EndingTask(endingPos,15.0));
     else
         _endingTask->setEndingPos(endingPos);
 }
 
-void PlanningProblem::addTask(PathTask *pathTask, bool secondary)
+void PlanningProblem::addTask(QSharedPointer<PathTask> pathTask, bool secondary)
 {
     if (!pathTask)
         return;
@@ -161,6 +180,16 @@ void PlanningProblem::addTask(PathTask *pathTask, bool secondary)
         _tasks.append(pathTask);
     else
         _secondaryTasks.append(pathTask);
+}
+
+QList<QSharedPointer<PathTask> > PlanningProblem::tasks() const
+{
+    return _tasks;
+}
+
+QList<QSharedPointer<PathTask> > PlanningProblem::secondaryTasks() const
+{
+    return _secondaryTasks;
 }
 
 void PlanningProblem::addArea(const QPolygonF &geoPoly)

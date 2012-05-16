@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QPointer>
-#include <QSet>
 #include <QStack>
 #include <QSharedPointer>
 
@@ -12,6 +11,7 @@
 #include "CircleObject.h"
 #include "PlanningProblemDisplayAdapter.h"
 #include "MWCommand.h"
+#include "Planner.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,7 +29,8 @@ signals:
     void MWCommandExecuted();
 
 private slots:
-    void handlePlanningControlStart(qreal desiredFitness);
+    void handlePlanningControlStartRequested();
+    void handlePlanningControlPauseRequested();
     void handlePlanningControlResetRequested();
     void handleStartPointAddRequested();
     void handleEndPointAddRequested();
@@ -64,8 +65,13 @@ private:
     MapGraphicsScene * _scene;
     MapGraphicsView * _view;
 
+    //This guy maps the "model" of the PlanningProblem to the "view" of the MapGraphics scene and view
     PlanningProblemDisplayAdapter * _adapter;
 
+    Planner * _planner;
+
+
+    //Stuff for undo/redo
     void doCommand(QSharedPointer<MWCommand> todo);
     QStack<QSharedPointer<MWCommand> > _undoStack;
     QStack<QSharedPointer<MWCommand> > _redoStack;

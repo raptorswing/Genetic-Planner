@@ -13,42 +13,7 @@ PlanningProblemDisplayAdapter::PlanningProblemDisplayAdapter(const PlanningProbl
 
 void PlanningProblemDisplayAdapter::setPlanningProblem(const PlanningProblem &nProblem)
 {
-    //Clear all old map GUI objects before setting up the new object
-    if (!_startPositionObject.isNull())
-    {
-        disconnect(_startPositionObject.data(),
-                   SIGNAL(destroyed()),
-                   this,
-                   SLOT(removeStartPosition()));
-        _startPositionObject->deleteLater();
-        _startPositionObject = 0;
-    }
-
-    if (!_endPositionObject.isNull())
-    {
-        disconnect(_endPositionObject.data(),
-                   SIGNAL(destroyed()),
-                   this,
-                   SLOT(removeEndPosition()));
-        _endPositionObject->deleteLater();
-        _endPositionObject = 0;
-    }
-
-    QHashIterator<TaskAreaObject *,QPolygonF> areaIter(_areas);
-    while (areaIter.hasNext())
-    {
-        areaIter.next();
-        TaskAreaObject * poly = areaIter.key();
-        QPolygonF oldGeoPoly = areaIter.value();
-        disconnect(poly,
-                   SIGNAL(destroyed()),
-                   this,
-                   SLOT(handleAreaDestroyed()));
-        poly->deleteLater();
-    }
-    _areas.clear();
-
-
+    this->clear();
 
     _problem = nProblem;
 
@@ -59,9 +24,9 @@ void PlanningProblemDisplayAdapter::setPlanningProblem(const PlanningProblem &nP
 
     QSet<QPolygonF> areas = _problem.areas();
     foreach (QPolygonF area, areas)
-    {
         this->addArea(area);
-    }
+
+    this->problemHasChanged();
 }
 
 PlanningProblem PlanningProblemDisplayAdapter::planningProblem() const
@@ -89,6 +54,8 @@ void PlanningProblemDisplayAdapter::setStartPosition(const QPointF &geoPos, cons
 
     _startPositionObject->setPos(geoPos);
     _problem.setStartingPos(geoPos,altitude);
+
+    this->problemHasChanged();
 }
 
 void PlanningProblemDisplayAdapter::removeStartPosition()
@@ -96,6 +63,8 @@ void PlanningProblemDisplayAdapter::removeStartPosition()
     if (!_startPositionObject.isNull())
         _startPositionObject->deleteLater();
     _problem.clearStartingPos();
+
+    this->problemHasChanged();
 }
 
 void PlanningProblemDisplayAdapter::setEndPosition(const QPointF &geoPos, const qreal &altitude)
@@ -117,6 +86,8 @@ void PlanningProblemDisplayAdapter::setEndPosition(const QPointF &geoPos, const 
     }
     _endPositionObject->setPos(geoPos);
     _problem.setEndingPos(geoPos,altitude);
+
+    this->problemHasChanged();
 }
 
 void PlanningProblemDisplayAdapter::removeEndPosition()
@@ -124,6 +95,8 @@ void PlanningProblemDisplayAdapter::removeEndPosition()
     if (!_endPositionObject.isNull())
         _endPositionObject->deleteLater();
     _problem.clearEndingPos();
+
+    this->problemHasChanged();
 }
 
 void PlanningProblemDisplayAdapter::addArea(const QPointF &center)
@@ -149,6 +122,8 @@ void PlanningProblemDisplayAdapter::addArea(const QPointF &center)
         _problem.addArea(obj->geoPoly());
     _areas.insert(obj,obj->geoPoly());
     _mgScene->addObject(obj);
+
+    this->problemHasChanged();
 }
 
 void PlanningProblemDisplayAdapter::addArea(const QPolygonF &poly)
@@ -166,6 +141,8 @@ void PlanningProblemDisplayAdapter::addArea(const QPolygonF &poly)
         _problem.addArea(obj->geoPoly());
     _areas.insert(obj,obj->geoPoly());
     _mgScene->addObject(obj);
+
+    this->problemHasChanged();
 }
 
 //private slot
@@ -174,6 +151,8 @@ void PlanningProblemDisplayAdapter::handleStartPositionObjectPosChanged()
     const QPointF& pos = _startPositionObject->pos();
     const qreal& alt = _problem.startingAlt();
     _problem.setStartingPos(pos,alt);
+
+    this->problemHasChanged();
 }
 
 //private slot
@@ -182,6 +161,8 @@ void PlanningProblemDisplayAdapter::handleEndPositionObjectPosChanged()
     const QPointF& pos = _endPositionObject->pos();
     const qreal& alt = _problem.endingAlt();
     _problem.setEndingPos(pos,alt);
+
+    this->problemHasChanged();
 }
 
 //private slot
@@ -205,6 +186,8 @@ void PlanningProblemDisplayAdapter::handleAreaChanged()
     _problem.removeArea(oldGeoPoly);
     _problem.addArea(poly->geoPoly());
     _areas.insert(poly,poly->geoPoly());
+
+    this->problemHasChanged();
 }
 
 //private slot
@@ -221,4 +204,46 @@ void PlanningProblemDisplayAdapter::handleAreaDestroyed()
     TaskAreaObject * dangerPolyPointer = (TaskAreaObject *)sender;
     QPolygonF oldGeoPoly = _areas.take(dangerPolyPointer);
     _problem.removeArea(oldGeoPoly);
+
+    this->problemHasChanged();
+}
+
+//private
+void PlanningProblemDisplayAdapter::clear()
+{
+    //Clear all old map GUI objects before setting up the new object
+    if (!_startPositionObject.isNull())
+    {
+        disconnect(_startPositionObject.data(),
+                   SIGNAL(destroyed()),
+                   this,
+                   SLOT(removeStartPosition()));
+        _startPositionObject->deleteLater();
+        _startPositionObject = 0;
+    }
+
+    if (!_endPositionObject.isNull())
+    {
+        disconnect(_endPositionObject.data(),
+                   SIGNAL(destroyed()),
+                   this,
+                   SLOT(removeEndPosition()));
+        _endPositionObject->deleteLater();
+        _endPositionObject = 0;
+    }
+
+    QHashIterator<TaskAreaObject *,QPolygonF> areaIter(_areas);
+    while (areaIter.hasNext())
+    {
+        areaIter.next();
+        TaskAreaObject * poly = areaIter.key();
+        disconnect(poly,
+                   SIGNAL(destroyed()),
+                   this,
+                   SLOT(handleAreaDestroyed()));
+        poly->deleteLater();
+    }
+    _areas.clear();
+
+    this->problemHasChanged();
 }

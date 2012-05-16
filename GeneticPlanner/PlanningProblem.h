@@ -6,6 +6,7 @@
 #include <QPointer>
 #include <QDataStream>
 #include <QSet>
+#include <QSharedPointer>
 
 #include "UAVParameters.h"
 #include "SensorDefinition.h"
@@ -20,11 +21,12 @@ public:
     PlanningProblem();
     PlanningProblem(const UAVParameters& uavParams,
                     const SensorDefinition& sensorParams);
+    PlanningProblem(const PlanningProblem& other);
     ~PlanningProblem();
 
     bool isReady() const;
 
-    qreal fitness(const Individual& individual);
+    qreal fitness(QSharedPointer<Individual> individual);
 
     UAVParameters uavSettings() const;
     SensorDefinition sensorSettings() const;
@@ -45,7 +47,9 @@ public:
     void setStartingPos(QPointF startingPos,qreal startingAlt=1423);
     void setEndingPos(QPointF endingPos, qreal endingAlt=1423);
 
-    void addTask(PathTask * pathTask,bool secondary=false);
+    void addTask(QSharedPointer<PathTask> pathTask,bool secondary=false);
+    QList<QSharedPointer<PathTask> > tasks() const;
+    QList<QSharedPointer<PathTask> > secondaryTasks() const;
 
     void addArea(const QPolygonF& geoPoly);
     void setAreas(const QSet<QPolygonF>& toSet);
@@ -64,9 +68,9 @@ private:
     QPointF _endingPos;
     qreal _endingAlt;
 
-    QList<PathTask *> _tasks;
-    QList<PathTask *> _secondaryTasks;
-    EndingTask * _endingTask;
+    QList<QSharedPointer<PathTask> > _tasks;
+    QList<QSharedPointer<PathTask> > _secondaryTasks;
+    QSharedPointer<EndingTask> _endingTask;
 
     QSet<QPolygonF> _areas;
 };
