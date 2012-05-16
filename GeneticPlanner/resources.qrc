@@ -16,6 +16,9 @@
         <file>crystal_project/16x16/actions/tooloptions.png</file>
         <file>crystal_project/16x16/actions/undo.png</file>
         <file>crystal_project/16x16/actions/redo.png</file>
+        <file>crystal_project/16x16/actions/player_pause.png</file>
+        <file>crystal_project/16x16/actions/player_play.png</file>
+        <file>crystal_project/16x16/actions/player_stop.png</file>
     </qresource>
     <qresource prefix="/icons/32x32">
         <file>crystal_project/32x32/apps/spire.png</file>
