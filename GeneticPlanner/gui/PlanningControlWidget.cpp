@@ -1,6 +1,8 @@
 #include "PlanningControlWidget.h"
 #include "ui_PlanningControlWidget.h"
 
+#include <QtDebug>
+
 PlanningControlWidget::PlanningControlWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PlanningControlWidget)
@@ -25,6 +27,7 @@ void PlanningControlWidget::setPlanningState(PlanningStatus status)
     {
         this->ui->currentFitnessDisplay->setValue(0.0);
         this->ui->currentIterationSpinbox->setValue(0);
+        this->ui->planProgressBar->setValue(0);
     }
 }
 
@@ -33,10 +36,25 @@ void PlanningControlWidget::setPlanningProgress(int iteration, qreal fitness)
     this->ui->currentIterationSpinbox->setValue(iteration);
     this->ui->currentFitnessDisplay->setValue(fitness);
 
-    if (this->ui->stopAtFitnessCheckBox->isChecked() && fitness >= this->ui->stopAtFitnessSpinBox->value())
-        this->planningPauseRequested();
-    else if (this->ui->stopAtIterationCheckBox->isChecked() && iteration >= this->ui->stopAtIterationSpinBox->value())
-        this->planningPauseRequested();
+    qreal fitnessProgress = 0.0;
+    qreal iterationProgress = 0.0;
+    if (this->ui->stopAtFitnessCheckBox->isChecked())
+    {
+        qreal stopAtFitness = this->ui->stopAtFitnessSpinBox->value();
+        if (fitness >= stopAtFitness)
+            this->planningPauseRequested();
+        fitnessProgress = fitness / this->ui->stopAtFitnessSpinBox->value();
+    }
+    if (this->ui->stopAtIterationCheckBox->isChecked())
+    {
+        int stopAtIteration = this->ui->stopAtIterationSpinBox->value();
+        if (iteration >= stopAtIteration)
+            this->planningPauseRequested();
+        iterationProgress = (qreal)iteration / (qreal)this->ui->stopAtIterationSpinBox->value();
+    }
+
+    qreal progress = qMax<qreal>(fitnessProgress,iterationProgress);
+    this->ui->planProgressBar->setValue(progress*100);
 }
 
 //public slot

@@ -5,6 +5,7 @@
 #include <QPointF>
 #include <QtGlobal>
 #include <QSharedPointer>
+#include <QDataStream>
 
 class PathTask
 {
@@ -16,6 +17,8 @@ public:
     virtual QString taskType() const=0;
 
     virtual QSharedPointer<PathTask> copy() const=0;
+
+    virtual void serialize(QDataStream& stream)=0;
 
 protected:
     static qreal normal(qreal x, qreal stdDev,qreal scaleFactor=1000.0);

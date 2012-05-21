@@ -9,6 +9,13 @@ EndingTask::EndingTask(const QPointF &endingPos, const qreal& endingAlt, qreal w
 {
 }
 
+EndingTask::EndingTask(QDataStream &stream)
+{
+    stream >> _endingPos;
+    stream >> _endingAlt;
+    stream >> _stdDev;
+}
+
 qreal EndingTask::performance(const QList<QPointF> &positions)
 {
     qreal goalScore = 0.0;
@@ -36,6 +43,13 @@ QSharedPointer<PathTask> EndingTask::copy() const
     return QSharedPointer<PathTask>(new EndingTask(_endingPos,
                                                    _endingAlt,
                                                    _stdDev));
+}
+
+void EndingTask::serialize(QDataStream &stream)
+{
+    stream << _endingPos;
+    stream << _endingAlt;
+    stream << _stdDev;
 }
 
 void EndingTask::setEndingPos(QPointF endingPos)

@@ -51,6 +51,12 @@ qreal Planner::getBestFitnessSoFar() const
     return _bestFitnessSoFar;
 }
 
+PlanningProblem Planner::problem() const
+{
+    return _problem;
+}
+
+//public slot
 void Planner::setProblem(const PlanningProblem &problem)
 {
     this->clearPlanning();
@@ -78,7 +84,7 @@ void Planner::clearPlanning()
     _bestFitnessSoFar = 0.0;
     _iterationCounter = 0;
     _genePool.clear();
-    this->planningFinished();
+    this->planningCleared();
 }
 
 //public slot

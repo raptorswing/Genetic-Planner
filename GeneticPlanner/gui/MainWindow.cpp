@@ -103,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this->ui->planningControlWidget,
             SLOT(setIsPaused()));
     connect(_planner,
-            SIGNAL(planningFinished()),
+            SIGNAL(planningCleared()),
             this->ui->planningControlWidget,
             SLOT(setIsStopped()));
     connect(_planner,
@@ -111,9 +111,21 @@ MainWindow::MainWindow(QWidget *parent) :
             this->ui->planningControlWidget,
             SLOT(setPlanningProgress(int,qreal)));
     connect(_adapter,
-            SIGNAL(problemHasChanged()),
+            SIGNAL(problemHasChanged(const PlanningProblem&)),
             _planner,
             SLOT(clearPlanning()));
+    connect(_adapter,
+            SIGNAL(problemHasChanged(PlanningProblem)),
+            _planner,
+            SLOT(setProblem(PlanningProblem)));
+    connect(_planner,
+            SIGNAL(planningPaused()),
+            this,
+            SLOT(handlePlanningPaused()));
+    connect(_planner,
+            SIGNAL(planningCleared()),
+            this,
+            SLOT(handlePlanningCleared()));
 
     //Spawn a helpful wizard!
     /*
@@ -141,7 +153,6 @@ void MainWindow::handlePlanningControlStartRequested()
         return;
     }
     qDebug() << "Start requested";
-    _planner->setProblem(_adapter->planningProblem());
     _planner->startPlanning();
 }
 
@@ -175,6 +186,35 @@ void MainWindow::handleEndPointAddRequested()
 void MainWindow::handleTaskAreaAddRequested()
 {
     _adapter->addArea(_view->center());
+}
+
+//private slot
+void MainWindow::handlePlanningPaused()
+{
+    //Get the path that is currently best
+    QSharedPointer<Individual> currentBest = _planner->getCurrentBest();
+
+    //Preview it
+    foreach(MapGraphicsObject * oldPreviewObj, _pathPreviewObjects)
+        oldPreviewObj->deleteLater();
+    _pathPreviewObjects.clear();
+
+    foreach(QPointF geoPos, currentBest->generateGeoPoints(_planner->problem().startingPos()))
+    {
+        CircleObject * circle = new CircleObject(4.0,
+                                                 false,
+                                                 Qt::yellow);
+        circle->setPos(geoPos);
+        _pathPreviewObjects.insert(circle);
+        _scene->addObject(circle);
+    }
+}
+
+void MainWindow::handlePlanningCleared()
+{
+    foreach(MapGraphicsObject * oldPreviewObj, _pathPreviewObjects)
+        oldPreviewObj->deleteLater();
+    _pathPreviewObjects.clear();
 }
 
 //private slot

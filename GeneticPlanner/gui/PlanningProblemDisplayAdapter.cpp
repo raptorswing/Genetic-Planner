@@ -26,7 +26,7 @@ void PlanningProblemDisplayAdapter::setPlanningProblem(const PlanningProblem &nP
     foreach (QPolygonF area, areas)
         this->addArea(area);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 PlanningProblem PlanningProblemDisplayAdapter::planningProblem() const
@@ -55,7 +55,7 @@ void PlanningProblemDisplayAdapter::setStartPosition(const QPointF &geoPos, cons
     _startPositionObject->setPos(geoPos);
     _problem.setStartingPos(geoPos,altitude);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 void PlanningProblemDisplayAdapter::removeStartPosition()
@@ -64,7 +64,7 @@ void PlanningProblemDisplayAdapter::removeStartPosition()
         _startPositionObject->deleteLater();
     _problem.clearStartingPos();
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 void PlanningProblemDisplayAdapter::setEndPosition(const QPointF &geoPos, const qreal &altitude)
@@ -87,7 +87,7 @@ void PlanningProblemDisplayAdapter::setEndPosition(const QPointF &geoPos, const 
     _endPositionObject->setPos(geoPos);
     _problem.setEndingPos(geoPos,altitude);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 void PlanningProblemDisplayAdapter::removeEndPosition()
@@ -96,7 +96,7 @@ void PlanningProblemDisplayAdapter::removeEndPosition()
         _endPositionObject->deleteLater();
     _problem.clearEndingPos();
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 void PlanningProblemDisplayAdapter::addArea(const QPointF &center)
@@ -123,7 +123,7 @@ void PlanningProblemDisplayAdapter::addArea(const QPointF &center)
     _areas.insert(obj,obj->geoPoly());
     _mgScene->addObject(obj);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 void PlanningProblemDisplayAdapter::addArea(const QPolygonF &poly)
@@ -142,7 +142,7 @@ void PlanningProblemDisplayAdapter::addArea(const QPolygonF &poly)
     _areas.insert(obj,obj->geoPoly());
     _mgScene->addObject(obj);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 //private slot
@@ -152,7 +152,7 @@ void PlanningProblemDisplayAdapter::handleStartPositionObjectPosChanged()
     const qreal& alt = _problem.startingAlt();
     _problem.setStartingPos(pos,alt);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 //private slot
@@ -162,7 +162,7 @@ void PlanningProblemDisplayAdapter::handleEndPositionObjectPosChanged()
     const qreal& alt = _problem.endingAlt();
     _problem.setEndingPos(pos,alt);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 //private slot
@@ -187,7 +187,7 @@ void PlanningProblemDisplayAdapter::handleAreaChanged()
     _problem.addArea(poly->geoPoly());
     _areas.insert(poly,poly->geoPoly());
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 //private slot
@@ -205,7 +205,7 @@ void PlanningProblemDisplayAdapter::handleAreaDestroyed()
     QPolygonF oldGeoPoly = _areas.take(dangerPolyPointer);
     _problem.removeArea(oldGeoPoly);
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }
 
 //private
@@ -245,5 +245,5 @@ void PlanningProblemDisplayAdapter::clear()
     }
     _areas.clear();
 
-    this->problemHasChanged();
+    this->problemHasChanged(_problem);
 }

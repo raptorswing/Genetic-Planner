@@ -1,14 +1,15 @@
 #ifndef FLYTHROUGHTASK_H
 #define FLYTHROUGHTASK_H
 
-#include <QPointF>
+#include <QPolygonF>
 
 #include "PathTask.h"
 
 class FlyThroughTask : public PathTask
 {
 public:
-    FlyThroughTask(QPointF flyThroughPoint, qreal flyThroughAlt, qreal withinDistance = 30.0);
+    FlyThroughTask(QPolygonF area, qreal flyThroughAlt);
+    FlyThroughTask(QDataStream& stream);
     virtual ~FlyThroughTask();
 
     virtual qreal performance(const QList<QPointF>& positions);
@@ -17,10 +18,14 @@ public:
 
     virtual QString taskType() const;
 
+    virtual void serialize(QDataStream& stream);
+
+    QPolygonF area() const;
+    qreal alt() const;
+
 private:
-    QPointF _flyThroughPoint;
+    QPolygonF _area;
     qreal _flyThroughAlt;
-    qreal _stdDev;
 };
 
 #endif // FLYTHROUGHTASK_H

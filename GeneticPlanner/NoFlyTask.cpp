@@ -9,6 +9,11 @@ NoFlyTask::NoFlyTask(QPolygonF geoPoly) :
 {
 }
 
+NoFlyTask::NoFlyTask(QDataStream &stream)
+{
+    stream >> _geoPoly;
+}
+
 qreal NoFlyTask::performance(const QList<QPointF> &positions)
 {
     qreal goalScore = 500.0;
@@ -36,4 +41,9 @@ QString NoFlyTask::taskType() const
 QSharedPointer<PathTask> NoFlyTask::copy() const
 {
     return QSharedPointer<PathTask>(new NoFlyTask(_geoPoly));
+}
+
+void NoFlyTask::serialize(QDataStream &stream)
+{
+    stream << _geoPoly;
 }

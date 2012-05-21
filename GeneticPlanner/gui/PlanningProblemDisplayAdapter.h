@@ -20,7 +20,7 @@ public:
     PlanningProblem planningProblem() const;
     
 signals:
-    void problemHasChanged();
+    void problemHasChanged(const PlanningProblem& problem);
     
 public slots:
     void setStartPosition(const QPointF& geoPos, const qreal& altitude);

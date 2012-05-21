@@ -16,7 +16,7 @@ class Planner : public QObject
 signals:
     void planningStarted();
     void planningPaused();
-    void planningFinished();
+    void planningCleared();
     void iterationFinished(int iterationNumber, qreal bestFitness);
 
 public:
@@ -27,9 +27,10 @@ public:
 
     qreal getBestFitnessSoFar() const;
 
-    void setProblem(const PlanningProblem& problem);
+    PlanningProblem problem() const;
 
 public slots:
+    void setProblem(const PlanningProblem& problem);
     void startPlanning();
     void pausePlanning();
     void clearPlanning();

@@ -4,11 +4,11 @@
 #include <cmath>
 #include <QtDebug>
 
-const int ACTION_DISTANCE_MAX = 10.0;
+const int ACTION_DISTANCE_MAX = 15.0;
 const int ACTION_DISTANCE_MIN = 2.0;
 const int TURNING_RATE_MAX_DEGREES_PER_SECOND = 20.0;
 const int SPEED_METERS_PER_SECOND = 15.0;
-const int MAX_ACTIONS = 100;
+const int MAX_ACTIONS = 125;
 
 const qreal PI = 3.1415926535897932384626433;
 
@@ -39,7 +39,8 @@ Individual::Individual(const Individual &A, int toModify)
     {
         for (int i = 0; i < toModify && _yawActions.size() <= MAX_ACTIONS; i++)
         {
-            _yawActions.append(this->randomYawAction());
+            //_yawActions.append(this->randomYawAction());
+            _yawActions.insert(qrand() % _yawActions.size(),this->randomYawAction());
         }
     }
     else

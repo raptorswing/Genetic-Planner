@@ -2,6 +2,7 @@
 
 #include "FlyThroughTask.h"
 #include "EndingTask.h"
+#include "NoFlyTask.h"
 
 #include <QtDebug>
 
@@ -69,7 +70,10 @@ qreal PlanningProblem::fitness(QSharedPointer<Individual> individual)
     QList<QPointF> geoPositions = individual->generateGeoPoints(this->startingPos());
 
     foreach(QSharedPointer<PathTask> task, _tasks)
-        toRet += task->performance(geoPositions);
+    {
+        qreal temp = task->performance(geoPositions);
+        toRet += temp;
+    }
 
     //Do the "ending task" if applicable
     if (_endingTask)
@@ -197,6 +201,9 @@ void PlanningProblem::addArea(const QPolygonF &geoPoly)
     _areas.insert(geoPoly);
     if (!_areas.contains(geoPoly))
         qWarning() << "Insertion of" << geoPoly << "failed";
+
+    QSharedPointer<FlyThroughTask> task(new FlyThroughTask(geoPoly,1550));
+    this->addTask(task);
 }
 
 void PlanningProblem::setAreas(const QSet<QPolygonF> &toSet)
@@ -230,6 +237,8 @@ QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
 
     stream << problem.areas();
 
+    stream << problem.tasks();
+    stream << problem.secondaryTasks();
 
     return stream;
 }
@@ -277,7 +286,41 @@ QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem)
     stream >> areas;
     problem.setAreas(areas);
 
+    QList<QSharedPointer<PathTask> > primaryTasks;
+    stream >> primaryTasks;
+    foreach(QSharedPointer<PathTask> task, primaryTasks)
+        problem.addTask(task);
 
+    QList<QSharedPointer<PathTask> > secondaryTasks;
+    stream >> secondaryTasks;
+    foreach(QSharedPointer<PathTask> task, secondaryTasks)
+        problem.addTask(task,true);
+
+
+    return stream;
+}
+
+QDataStream & operator<< (QDataStream& stream, const QSharedPointer<PathTask>& problem)
+{
+    QString type = problem->taskType();
+
+    stream << type;
+    problem->serialize(stream);
+
+    return stream;
+}
+
+QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem)
+{
+    QString type;
+    stream >> type;
+
+    if (type == "FlyThrough")
+        problem = QSharedPointer<PathTask>(new FlyThroughTask(stream));
+    else if (type == "NoFly")
+        problem = QSharedPointer<PathTask>(new NoFlyTask(stream));
+    else if (type == "Ending")
+        problem = QSharedPointer<PathTask>(new EndingTask(stream));
     return stream;
 }
 

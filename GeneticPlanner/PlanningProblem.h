@@ -77,6 +77,8 @@ private:
 
 QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem);
 QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem);
+QDataStream & operator<< (QDataStream& stream, const QSharedPointer<PathTask>& problem);
+QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem);
 
 bool operator==(const QPolygonF& A, const QPolygonF& B);
 bool operator!=(const QPolygonF& A, const QPolygonF& B);

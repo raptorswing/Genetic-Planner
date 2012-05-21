@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QStack>
 #include <QSharedPointer>
+#include <QSet>
 
 #include "MapGraphicsScene.h"
 #include "MapGraphicsView.h"
@@ -35,6 +36,8 @@ private slots:
     void handleStartPointAddRequested();
     void handleEndPointAddRequested();
     void handleTaskAreaAddRequested();
+    void handlePlanningPaused();
+    void handlePlanningCleared();
 
     void undo();
     void redo();
@@ -69,6 +72,8 @@ private:
     PlanningProblemDisplayAdapter * _adapter;
 
     Planner * _planner;
+
+    QSet<MapGraphicsObject *> _pathPreviewObjects;
 
 
     //Stuff for undo/redo
