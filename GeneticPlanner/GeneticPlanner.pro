@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     TaskAreaObject.cpp \
     gui/MWCommand.cpp \
     gui/PlanningProblemDisplayAdapter.cpp \
-    gui/commands/SetProblemCommand.cpp
+    gui/commands/SetProblemCommand.cpp \
+    TaskArea.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -51,7 +52,8 @@ HEADERS  += gui/MainWindow.h \
     TaskAreaObject.h \
     gui/MWCommand.h \
     gui/PlanningProblemDisplayAdapter.h \
-    gui/commands/SetProblemCommand.h
+    gui/commands/SetProblemCommand.h \
+    TaskArea.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \

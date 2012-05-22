@@ -196,28 +196,25 @@ QList<QSharedPointer<PathTask> > PlanningProblem::secondaryTasks() const
     return _secondaryTasks;
 }
 
-void PlanningProblem::addArea(const QPolygonF &geoPoly)
+void PlanningProblem::addArea(const TaskArea &area)
 {
-    _areas.insert(geoPoly);
-    if (!_areas.contains(geoPoly))
-        qWarning() << "Insertion of" << geoPoly << "failed";
-
-    QSharedPointer<FlyThroughTask> task(new FlyThroughTask(geoPoly,1550));
-    this->addTask(task);
+    _areas.insert(area);
+    if (!_areas.contains(area))
+        qWarning() << "Insertion of area failed";
 }
 
-void PlanningProblem::setAreas(const QSet<QPolygonF> &toSet)
+void PlanningProblem::setAreas(const QSet<TaskArea> &toSet)
 {
     _areas = toSet;
 }
 
-void PlanningProblem::removeArea(const QPolygonF &toRemove)
+void PlanningProblem::removeArea(const TaskArea &toRemove)
 {
     if (!_areas.remove(toRemove))
-        qWarning() << this << "failed to remove area" << toRemove << ". Size is now" << _areas.size();
+        qWarning() << this << "failed to remove area. Size is now" << _areas.size();
 }
 
-QSet<QPolygonF> PlanningProblem::areas() const
+QSet<TaskArea> PlanningProblem::areas() const
 {
     return _areas;
 }
@@ -235,10 +232,7 @@ QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
     stream << problem.endingPos();
     stream << problem.endingAlt();
 
-    stream << problem.areas();
-
-    stream << problem.tasks();
-    stream << problem.secondaryTasks();
+    //stream << problem.areas();
 
     return stream;
 }
@@ -282,20 +276,11 @@ QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem)
     else
         problem.clearEndingPos();
 
-    QSet<QPolygonF> areas;
+    /*
+    QSet<TaskArea> areas;
     stream >> areas;
     problem.setAreas(areas);
-
-    QList<QSharedPointer<PathTask> > primaryTasks;
-    stream >> primaryTasks;
-    foreach(QSharedPointer<PathTask> task, primaryTasks)
-        problem.addTask(task);
-
-    QList<QSharedPointer<PathTask> > secondaryTasks;
-    stream >> secondaryTasks;
-    foreach(QSharedPointer<PathTask> task, secondaryTasks)
-        problem.addTask(task,true);
-
+    */
 
     return stream;
 }
@@ -354,5 +339,42 @@ uint qHash(const QPolygonF& poly)
         const QPointF& pos = poly.at(i);
         toRet ^= qRound(pos.x() + pos.y());
     }
+    return toRet;
+}
+
+bool operator==(const TaskArea& A, const TaskArea& B)
+{
+    if (A.polygon() != B.polygon())
+        return false;
+
+    QList<QSharedPointer<PathTask> > aTasks = A.tasks();
+    QList<QSharedPointer<PathTask> > bTasks = B.tasks();
+    if (aTasks.size() != bTasks.size())
+        return false;
+
+    for (int i = 0; i < aTasks.size(); i++)
+    {
+        QSharedPointer<PathTask> task = aTasks[i];
+        if (!bTasks.contains(task))
+            return false;
+    }
+    return true;
+}
+
+bool operator!=(const TaskArea& A, const TaskArea& B)
+{
+    return !(A == B);
+}
+
+uint qHash(const TaskArea& area)
+{
+    uint toRet = 0;
+
+    QList<QSharedPointer<PathTask> > tasks = area.tasks();
+    foreach(QSharedPointer<PathTask> task, tasks)
+        toRet += qHash(task->taskType());
+
+    toRet ^= qHash(area.polygon());
+
     return toRet;
 }

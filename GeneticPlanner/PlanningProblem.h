@@ -14,6 +14,7 @@
 #include "PathTask.h"
 #include "PolygonObject.h"
 #include "EndingTask.h"
+#include "TaskArea.h"
 
 class PlanningProblem
 {
@@ -51,10 +52,10 @@ public:
     QList<QSharedPointer<PathTask> > tasks() const;
     QList<QSharedPointer<PathTask> > secondaryTasks() const;
 
-    void addArea(const QPolygonF& geoPoly);
-    void setAreas(const QSet<QPolygonF>& toSet);
-    void removeArea(const QPolygonF& toRemove);
-    QSet<QPolygonF> areas() const;
+    void addArea(const TaskArea& area);
+    void setAreas(const QSet<TaskArea>& toSet);
+    void removeArea(const TaskArea& toRemove);
+    QSet<TaskArea> areas() const;
 
 private:
     UAVParameters _uavSettings;
@@ -72,7 +73,7 @@ private:
     QList<QSharedPointer<PathTask> > _secondaryTasks;
     QSharedPointer<EndingTask> _endingTask;
 
-    QSet<QPolygonF> _areas;
+    QSet<TaskArea> _areas;
 };
 
 QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem);
@@ -82,6 +83,10 @@ QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem
 
 bool operator==(const QPolygonF& A, const QPolygonF& B);
 bool operator!=(const QPolygonF& A, const QPolygonF& B);
-uint qHash(const QPolygonF& poly);
+uint qHash(const QPolygonF &poly);
+
+bool operator==(const TaskArea& A, const TaskArea& B);
+bool operator!=(const TaskArea& A, const TaskArea& B);
+uint qHash(const TaskArea& area);
 
 #endif // PLANNINGPROBLEM_H
