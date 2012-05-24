@@ -10,14 +10,14 @@
 class FitnessRunnable : public QRunnable
 {
 public:
-    FitnessRunnable(PlanningProblem * problem, QSharedPointer<Individual> individual);
+    FitnessRunnable(QSharedPointer<PlanningProblem> problem, QSharedPointer<Individual> individual);
 
     virtual void run();
 
     qreal result() const;
 
 private:
-    PlanningProblem * _problem;
+    QSharedPointer<PlanningProblem> _problem;
     QSharedPointer<Individual> _individual;
     qreal _result;
 };

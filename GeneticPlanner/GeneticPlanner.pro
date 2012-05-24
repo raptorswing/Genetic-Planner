@@ -22,16 +22,17 @@ SOURCES += main.cpp\
     gui/PlanningControlWidget.cpp \
     gui/PlanningWizard.cpp \
     PlanningProblem.cpp \
-    PathTask.cpp \
-    FlyThroughTask.cpp \
+    tasks/PathTask.cpp \
+    tasks/FlyThroughTask.cpp \
     gui/PaletteWidget.cpp \
-    EndingTask.cpp \
-    NoFlyTask.cpp \
+    tasks/EndingTask.cpp \
+    tasks/NoFlyTask.cpp \
     TaskAreaObject.cpp \
     gui/MWCommand.cpp \
-    gui/PlanningProblemDisplayAdapter.cpp \
-    gui/commands/SetProblemCommand.cpp \
-    TaskArea.cpp
+    TaskArea.cpp \
+    Position.cpp \
+    Pose.cpp \
+    ProblemModelAdapter.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -44,16 +45,17 @@ HEADERS  += gui/MainWindow.h \
     gui/PlanningControlWidget.h \
     gui/PlanningWizard.h \
     PlanningProblem.h \
-    PathTask.h \
-    FlyThroughTask.h \
+    tasks/PathTask.h \
+    tasks/FlyThroughTask.h \
     gui/PaletteWidget.h \
-    EndingTask.h \
-    NoFlyTask.h \
+    tasks/EndingTask.h \
+    tasks/NoFlyTask.h \
     TaskAreaObject.h \
     gui/MWCommand.h \
-    gui/PlanningProblemDisplayAdapter.h \
-    gui/commands/SetProblemCommand.h \
-    TaskArea.h
+    TaskArea.h \
+    Position.h \
+    Pose.h \
+    ProblemModelAdapter.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \

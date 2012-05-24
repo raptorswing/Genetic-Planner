@@ -44,7 +44,6 @@ QRectF PolygonObject::boundingRect() const
 //virtual from MapGraphicsObject
 bool PolygonObject::contains(const QPointF &geoPos) const
 {
-
     return _geoPoly.containsPoint(geoPos,
                                   Qt::OddEvenFill);
 }
@@ -125,8 +124,12 @@ QPolygonF PolygonObject::geoPoly() const
 
 void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
 {
+    if (newPoly == _geoPoly)
+        return;
+
     _geoPoly = newPoly;
     this->setPos(newPoly.boundingRect().center());
+    this->polygonChanged(newPoly);
 }
 
 //protected
@@ -182,6 +185,9 @@ void PolygonObject::handleEditCirclePosChanged()
 
     //We need to update the positions of our "add vertex" controllers
     this->fixAddVertexCirclePos();
+
+    //Emit a signal so everyone knows that the polygon changed
+    this->polygonChanged(this->geoPoly());
 }
 
 //private slot
@@ -229,6 +235,9 @@ void PolygonObject::handleAddVertexCircleSelected()
     _addVertexCircles.insert(index,addVertexCircle);
 
     this->fixAddVertexCirclePos();
+
+    //Emit a signal so everyone knows that the polygon changed
+    this->polygonChanged(this->geoPoly());
 }
 
 //private slot

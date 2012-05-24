@@ -18,26 +18,27 @@ signals:
     void planningPaused();
     void planningCleared();
     void iterationFinished(int iterationNumber, qreal bestFitness);
+    void newProblemSet(QSharedPointer<PlanningProblem>);
 
 public:
-    Planner(const PlanningProblem& problem, QObject * parent=0);
+    Planner(QSharedPointer<PlanningProblem> problem, QObject * parent=0);
     ~Planner();
 
     QSharedPointer<Individual> getCurrentBest() const;
 
     qreal getBestFitnessSoFar() const;
 
-    PlanningProblem problem() const;
+    QSharedPointer<PlanningProblem> problem() const;
 
 public slots:
-    void setProblem(const PlanningProblem& problem);
+    void setProblem(QSharedPointer<PlanningProblem> problem);
     void startPlanning();
     void pausePlanning();
     void clearPlanning();
     void doIteration();
 
 private:
-    PlanningProblem _problem;
+    QSharedPointer<PlanningProblem> _problem;
 
     QMap<qreal, QSharedPointer<Individual> > _genePool;
 
