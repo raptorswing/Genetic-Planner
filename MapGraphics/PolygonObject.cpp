@@ -115,6 +115,9 @@ void PolygonObject::setPos(const QPointF & nPos)
     }
 
     MapGraphicsObject::setPos(nPos);
+
+    //If this isn't here, we get TEARING when we edit our polygons
+    this->posChanged();
 }
 
 QPolygonF PolygonObject::geoPoly() const
