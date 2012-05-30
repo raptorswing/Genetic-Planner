@@ -4,6 +4,8 @@
 #include <QList>
 #include <QPointF>
 
+#include "Position.h"
+
 /*!
  \brief Represents an individual in the genetic planner. An individual is basically a series of genes.
 
@@ -54,7 +56,7 @@ public:
 
     void appendYawAction(const YawAction&);
 
-    QList<QPointF> generateGeoPoints(const QPointF& startingPos) const;
+    QList<Position> generatePositions(const Position& startingPos) const;
 
     bool isUtilityComputed() const;
     qreal computedUtility() const;

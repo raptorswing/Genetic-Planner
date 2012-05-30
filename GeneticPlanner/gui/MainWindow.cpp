@@ -211,28 +211,27 @@ void MainWindow::handlePlanningPaused()
     //Get the path that is currently best
     QSharedPointer<Individual> currentBest = _planner->getCurrentBest();
 
-    //Preview it
+    //Remove old preview data if needed
     foreach(MapGraphicsObject * oldPreviewObj, _pathPreviewObjects)
         oldPreviewObj->deleteLater();
     _pathPreviewObjects.clear();
 
-    /*
-    foreach(QPointF geoPos, currentBest->generateGeoPoints(_planner->problem().startingPos()))
+
+    foreach(Position geoPos, currentBest->generatePositions(_planner->problem()->startingPosition()))
     {
         CircleObject * circle = new CircleObject(4.0,
                                                  false,
                                                  Qt::yellow);
-        circle->setPos(geoPos);
+        circle->setPos(geoPos.lonLat());
         _pathPreviewObjects.insert(circle);
         _scene->addObject(circle);
     }
-    */
+
 }
 
 //private slot
 void MainWindow::handlePlanningCleared()
 {
-
     foreach(MapGraphicsObject * oldPreviewObj, _pathPreviewObjects)
         oldPreviewObj->deleteLater();
     _pathPreviewObjects.clear();
@@ -245,6 +244,7 @@ void MainWindow::handleNewProblemSet(QSharedPointer<PlanningProblem> problem)
         return;
 
     _adapter->setProblem(problem.toWeakRef());
+    this->handlePlanningCleared();
 }
 
 //private slot

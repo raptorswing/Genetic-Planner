@@ -110,9 +110,9 @@ void Individual::appendYawAction(const Individual::YawAction & action)
     _yawActions.append(action);
 }
 
-QList<QPointF> Individual::generateGeoPoints(const QPointF &startingPos) const
+QList<Position> Individual::generatePositions(const Position &startingPos) const
 {
-    QList<QPointF> toRet;
+    QList<Position> toRet;
     toRet.append(startingPos);
 
     qreal directionRad = 0.0;
@@ -130,7 +130,7 @@ QList<QPointF> Individual::generateGeoPoints(const QPointF &startingPos) const
         for (int i = 0; i < action.distance; i++)
         {
             QVector3D enuPos(0,0,0);
-            QPointF geoPos = toRet.last();
+            Position geoPos = toRet.last();
 
             //If the action is a turn, we have to change our direction
             if (!action.isStraight)
@@ -146,10 +146,11 @@ QList<QPointF> Individual::generateGeoPoints(const QPointF &startingPos) const
             QPointF newGeoPos = Conversions::enu2lla(enuPos.x(),
                                                      enuPos.y(),
                                                      enuPos.z(),
-                                                     geoPos.y(),
-                                                     geoPos.x(),
+                                                     geoPos.latitude(),
+                                                     geoPos.longitude(),
                                                      0.0).lonlat;
-            toRet.append(newGeoPos);
+            Position newPosition(newGeoPos,1500);
+            toRet.append(newPosition);
         }
     }
 

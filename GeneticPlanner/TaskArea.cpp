@@ -1,5 +1,8 @@
 #include "TaskArea.h"
 
+#include "tasks/NoFlyTask.h"
+#include "tasks/FlyThroughTask.h"
+
 #include <QtDebug>
 
 TaskArea::TaskArea(const QPolygonF &geoPoly) :
@@ -11,7 +14,7 @@ TaskArea::~TaskArea()
 {
 }
 
-QPolygonF TaskArea::polygon() const
+QPolygonF TaskArea::geoPoly() const
 {
     return _geoPoly;
 }
@@ -26,6 +29,10 @@ void TaskArea::addTask(QSharedPointer<PathTask> task)
             SIGNAL(changed()),
             this,
             SIGNAL(changed()));
+    connect(this,
+            SIGNAL(geoPolyChanged(QPolygonF)),
+            rawTask,
+            SLOT(setGeoPoly(QPolygonF)));
 
     _tasks.insert(task);
     this->changed();
@@ -45,13 +52,19 @@ QSet<QSharedPointer<PathTask> > TaskArea::tasks() const
     return _tasks;
 }
 
+int TaskArea::numTasks() const
+{
+    return _tasks.size();
+}
+
 //public slot
-void TaskArea::setPolygon(const QPolygonF &geoPoly)
+void TaskArea::setGeoPoly(const QPolygonF &geoPoly)
 {
     if (geoPoly == _geoPoly)
         return;
 
     _geoPoly = geoPoly;
+    this->geoPolyChanged(geoPoly);
     this->changed();
 }
 
@@ -71,7 +84,16 @@ TaskArea &TaskArea::operator =(const TaskArea &other)
 
 QDataStream& operator <<(QDataStream& stream, const TaskArea& area)
 {
-    stream << area.polygon();
+    stream << area.geoPoly();
+
+    stream << area.numTasks();
+    QSet<QSharedPointer<PathTask> > tasks = area.tasks();
+    foreach(QSharedPointer<PathTask> task, tasks)
+    {
+        stream << task->taskType();
+        task->serialize(stream);
+    }
+
     return stream;
 }
 
@@ -79,8 +101,23 @@ QDataStream& operator >>(QDataStream& stream, TaskArea& area)
 {
     QPolygonF poly;
     stream >> poly;
+    area.setGeoPoly(poly);
 
-    area.setPolygon(poly);
+    int numTasks;
+    stream >> numTasks;
+    for (int i = 0; i < numTasks; i++)
+    {
+        QString type;
+        stream >> type;
+        QSharedPointer<PathTask> task;
+        if (type == "NoFly")
+            task = QSharedPointer<PathTask>(new NoFlyTask(stream));
+        else if (type == "FlyThrough")
+            task = QSharedPointer<PathTask>(new FlyThroughTask(stream));
+        else
+            qWarning() << "Unknown task type" << type;
+        area.addTask(task);
+    }
 
     return stream;
 }

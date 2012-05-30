@@ -12,7 +12,7 @@ public:
     FlyThroughTask(QDataStream& stream);
     virtual ~FlyThroughTask();
 
-    virtual qreal performance(const QList<QPointF>& positions);
+    virtual qreal performance(const QList<Position> &positions);
 
     virtual QSharedPointer<PathTask> copy() const;
 
@@ -20,11 +20,9 @@ public:
 
     virtual void serialize(QDataStream& stream);
 
-    QPolygonF area() const;
     qreal alt() const;
 
 private:
-    QPolygonF _area;
     qreal _flyThroughAlt;
 };
 

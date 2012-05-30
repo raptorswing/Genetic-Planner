@@ -84,6 +84,7 @@ void ProblemModelAdapter::handleStartPositionChanged(const Position &pos)
                 SIGNAL(destroyed()),
                 this,
                 SLOT(handleStartMarkerDestroyed()));
+        _startMarker->setZValue(50);
     }
     _startMarker->setPos(pos.lonLat());
 }
@@ -114,6 +115,7 @@ void ProblemModelAdapter::handleEndPositionChanged(const Position &pos)
                 SIGNAL(destroyed()),
                 this,
                 SLOT(handleEndMarkerDestroyed()));
+        _endMarker->setZValue(50);
     }
     _endMarker->setPos(pos.lonLat());
 }

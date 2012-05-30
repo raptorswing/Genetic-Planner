@@ -3,13 +3,15 @@
 #include "guts/Conversions.h"
 
 FlyThroughTask::FlyThroughTask(QPolygonF area, qreal flyThroughAlt) :
-    _area(area), _flyThroughAlt(flyThroughAlt)
+    PathTask(area), _flyThroughAlt(flyThroughAlt)
 {
 }
 
 FlyThroughTask::FlyThroughTask(QDataStream &stream)
 {
-    stream >> _area;
+    QPolygonF area;
+    stream >> area;
+    this->setGeoPoly(area);
     stream >> _flyThroughAlt;
 }
 
@@ -17,24 +19,24 @@ FlyThroughTask::~FlyThroughTask()
 {
 }
 
-qreal FlyThroughTask::performance(const QList<QPointF> &positions)
+qreal FlyThroughTask::performance(const QList<Position> &positions)
 {
     qreal goalScore = 0.0;
 
-    const QPointF goalPoint = _area.boundingRect().center();
+    const QPointF goalPoint = this->geoPoly().boundingRect().center();
     const qreal stdDev = 30.0;
 
     qreal closestDist = 5000000;
-    foreach(const QPointF geoPos, positions)
+    foreach(const Position geoPos, positions)
     {
 
-        QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),_flyThroughAlt,
+        QVector3D enuPos = Conversions::lla2enu(geoPos.latitude(),geoPos.longitude(),_flyThroughAlt,
                                                 goalPoint.y(),goalPoint.x(),_flyThroughAlt);
         qreal dist = enuPos.length();
         if (dist < closestDist)
             closestDist = dist;
 
-        if (_area.containsPoint(geoPos,Qt::OddEvenFill))
+        if (this->geoPoly().containsPoint(geoPos.lonLat(),Qt::OddEvenFill))
             return 500.0;
     }
 
@@ -47,7 +49,7 @@ qreal FlyThroughTask::performance(const QList<QPointF> &positions)
 
 QSharedPointer<PathTask> FlyThroughTask::copy() const
 {
-    return QSharedPointer<PathTask>(new FlyThroughTask(_area,
+    return QSharedPointer<PathTask>(new FlyThroughTask(this->geoPoly(),
                                                        _flyThroughAlt));
 }
 
@@ -58,13 +60,8 @@ QString FlyThroughTask::taskType() const
 
 void FlyThroughTask::serialize(QDataStream &stream)
 {
-    stream << _area;
+    stream << this->geoPoly();
     stream << _flyThroughAlt;
-}
-
-QPolygonF FlyThroughTask::area() const
-{
-    return _area;
 }
 
 qreal FlyThroughTask::alt() const

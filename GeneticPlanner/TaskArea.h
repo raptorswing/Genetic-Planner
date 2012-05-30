@@ -16,17 +16,19 @@ public:
     TaskArea(const QPolygonF& geoPoly);
     ~TaskArea();
 
-    QPolygonF polygon() const;
+    QPolygonF geoPoly() const;
 
     void addTask(QSharedPointer<PathTask> task);
     void removeTask(QSharedPointer<PathTask> task);
     QSet<QSharedPointer<PathTask> > tasks() const;
+    int numTasks() const;
 
 public slots:
-    void setPolygon(const QPolygonF& geoPoly);
+    void setGeoPoly(const QPolygonF& geoPoly);
 
 signals:
     void changed();
+    void geoPolyChanged(const QPolygonF& geoPoly);
 
 
 private:

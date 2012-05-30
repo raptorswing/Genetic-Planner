@@ -12,7 +12,7 @@ public:
     NoFlyTask(QPolygonF geoPoly);
     NoFlyTask(QDataStream& stream);
 
-    virtual qreal performance(const QList<QPointF>& positions);
+    virtual qreal performance(const QList<Position>& positions);
 
     virtual QString taskType() const;
 
@@ -20,8 +20,7 @@ public:
 
     virtual void serialize(QDataStream& stream);
 
-private:
-    QPolygonF _geoPoly;
+    virtual bool shortnessRewardApplies() const;
 };
 
 #endif // NOFLYTASK_H

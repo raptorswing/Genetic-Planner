@@ -15,7 +15,7 @@ const qreal PI = 3.1415926535897932384626433;
 const qreal SQRT2PI = sqrt(2.0*PI);
 
 Planner::Planner(QSharedPointer<PlanningProblem> problem, QObject *parent) :
-    QObject(parent), _problem(problem)
+    QObject(parent)
 {
     qsrand(QDateTime::currentDateTime().toTime_t() ^ qHash(QHostInfo::localHostName()));
 
@@ -30,6 +30,8 @@ Planner::Planner(QSharedPointer<PlanningProblem> problem, QObject *parent) :
             SIGNAL(timeout()),
             this,
             SLOT(doIteration()));
+
+    this->setProblem(problem);
 }
 
 Planner::~Planner()
@@ -62,6 +64,11 @@ void Planner::setProblem(QSharedPointer<PlanningProblem> problem)
     this->clearPlanning();
     _problem = problem;
     this->newProblemSet(problem);
+
+    connect(problem.data(),
+            SIGNAL(changed()),
+            this,
+            SLOT(clearPlanning()));
 }
 
 //public slot

@@ -19,17 +19,31 @@ PlanningProblem::~PlanningProblem()
 
 bool PlanningProblem::isReady() const
 {
-    //return (this->isStartingDefined());
-    return false;
+    return (this->isStartDefined());
 }
 
 qreal PlanningProblem::fitness(QSharedPointer<Individual> individual)
 {
-    if (!this->isReady())
-        return 0.0;
-
     qreal toRet = 0.0;
+    qreal shortnessBonus = 0.0;
+    if (!this->isReady())
+        return toRet;
 
+    QList<Position> positions = individual->generatePositions(this->startingPosition());
+
+    foreach(QSharedPointer<TaskArea> area, this->areas())
+    {
+        foreach(QSharedPointer<PathTask> task, area->tasks())
+        {
+            qreal score = task->performance(positions);
+            toRet += score;
+            if (task->shortnessRewardApplies())
+                shortnessBonus += (score / positions.size());
+
+        }
+    }
+
+    toRet += shortnessBonus;
     return toRet;
 }
 

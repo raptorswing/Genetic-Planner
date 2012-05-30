@@ -32,7 +32,9 @@ SOURCES += main.cpp\
     TaskArea.cpp \
     Position.cpp \
     Pose.cpp \
-    ProblemModelAdapter.cpp
+    ProblemModelAdapter.cpp \
+    gui/TaskAreaObjectEditWidget.cpp \
+    gui/TaskAreaListModel.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -55,14 +57,17 @@ HEADERS  += gui/MainWindow.h \
     TaskArea.h \
     Position.h \
     Pose.h \
-    ProblemModelAdapter.h
+    ProblemModelAdapter.h \
+    gui/TaskAreaObjectEditWidget.h \
+    gui/TaskAreaListModel.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \
     gui/SensorParametersWidget.ui \
     gui/PlanningControlWidget.ui \
     gui/PlanningWizard.ui \
-    gui/PaletteWidget.ui
+    gui/PaletteWidget.ui \
+    gui/TaskAreaObjectEditWidget.ui
 
 #Linkage for MapGraphics library
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MapGraphics/release/ -lMapGraphics
