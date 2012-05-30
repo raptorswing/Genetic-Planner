@@ -90,13 +90,13 @@
   <customwidget>
    <class>UAVParametersWidget</class>
    <extends>QWidget</extends>
-   <header>UAVParametersWidget.h</header>
+   <header>gui/UAVParametersWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>SensorParametersWidget</class>
    <extends>QWidget</extends>
-   <header>SensorParametersWidget.h</header>
+   <header>gui/SensorParametersWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

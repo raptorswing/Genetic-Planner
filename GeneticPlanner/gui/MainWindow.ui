@@ -200,13 +200,13 @@
   <customwidget>
    <class>PlanningControlWidget</class>
    <extends>QWidget</extends>
-   <header>PlanningControlWidget.h</header>
+   <header>gui/PlanningControlWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PaletteWidget</class>
    <extends>QWidget</extends>
-   <header>PaletteWidget.h</header>
+   <header>gui/PaletteWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
