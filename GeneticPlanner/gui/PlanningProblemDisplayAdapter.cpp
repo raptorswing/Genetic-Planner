@@ -22,8 +22,8 @@ void PlanningProblemDisplayAdapter::setPlanningProblem(const PlanningProblem &nP
     if (_problem.isEndingDefined())
         this->setEndPosition(_problem.endingPos(),_problem.endingAlt());
 
-    QSet<QPolygonF> areas = _problem.areas();
-    foreach (QPolygonF area, areas)
+    QSet<TaskArea> areas = _problem.areas();
+    foreach (TaskArea area, areas)
         this->addArea(area);
 
     this->problemHasChanged(_problem);
@@ -126,8 +126,9 @@ void PlanningProblemDisplayAdapter::addArea(const QPointF &center)
     this->problemHasChanged(_problem);
 }
 
-void PlanningProblemDisplayAdapter::addArea(const QPolygonF &poly)
+void PlanningProblemDisplayAdapter::addArea(const TaskArea &area)
 {
+    /*
     TaskAreaObject * obj = new TaskAreaObject(poly);
     connect(obj,
             SIGNAL(posChanged()),
@@ -143,6 +144,7 @@ void PlanningProblemDisplayAdapter::addArea(const QPolygonF &poly)
     _mgScene->addObject(obj);
 
     this->problemHasChanged(_problem);
+    */
 }
 
 //private slot
@@ -172,20 +174,25 @@ void PlanningProblemDisplayAdapter::handleAreaChanged()
     if (!sender)
         return;
 
-    TaskAreaObject * poly = qobject_cast<TaskAreaObject *>(sender);
-    if (!poly)
+    TaskAreaObject * obj = qobject_cast<TaskAreaObject *>(sender);
+    if (!obj)
         return;
 
-    if (!_areas.contains(poly))
+    if (!_areas.contains(obj))
     {
-        qWarning() << this << "area mapping doesn't contain" << poly;
+        qWarning() << this << "area mapping doesn't contain" << obj;
         return;
     }
 
-    QPolygonF oldGeoPoly = _areas.value(poly);
-    _problem.removeArea(oldGeoPoly);
-    _problem.addArea(poly->geoPoly());
-    _areas.insert(poly,poly->geoPoly());
+    QPolygonF oldGeoPoly = _areas.value(obj);
+    _areas.insert(obj,obj->geoPoly());
+
+    QSet<TaskArea> taskAreas = _problem.areas();
+    for (int i = 0; i < taskAreas.size(); i++)
+    {
+
+    }
+
 
     this->problemHasChanged(_problem);
 }

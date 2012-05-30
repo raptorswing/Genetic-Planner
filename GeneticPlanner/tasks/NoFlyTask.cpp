@@ -5,22 +5,24 @@
 #include "guts/Conversions.h"
 
 NoFlyTask::NoFlyTask(QPolygonF geoPoly) :
-    _geoPoly(geoPoly)
+    PathTask(geoPoly)
 {
 }
 
 NoFlyTask::NoFlyTask(QDataStream &stream)
 {
-    stream >> _geoPoly;
+    QPolygonF poly;
+    stream >> poly;
+    this->setGeoPoly(poly);
 }
 
-qreal NoFlyTask::performance(const QList<QPointF> &positions)
+qreal NoFlyTask::performance(const QList<Position> &positions)
 {
     qreal goalScore = 500.0;
 
-    foreach(QPointF geoPos, positions)
+    foreach(Position geoPos, positions)
     {
-        if (_geoPoly.containsPoint(geoPos,Qt::OddEvenFill))
+        if (this->geoPoly().containsPoint(geoPos.lonLat(),Qt::OddEvenFill))
         {
             goalScore -= 10;
             if (goalScore <= 0)
@@ -40,10 +42,15 @@ QString NoFlyTask::taskType() const
 
 QSharedPointer<PathTask> NoFlyTask::copy() const
 {
-    return QSharedPointer<PathTask>(new NoFlyTask(_geoPoly));
+    return QSharedPointer<PathTask>(new NoFlyTask(this->geoPoly()));
 }
 
 void NoFlyTask::serialize(QDataStream &stream)
 {
-    stream << _geoPoly;
+    stream << this->geoPoly();
+}
+
+bool NoFlyTask::shortnessRewardApplies() const
+{
+    return false;
 }

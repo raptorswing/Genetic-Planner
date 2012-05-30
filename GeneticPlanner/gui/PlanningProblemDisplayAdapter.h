@@ -29,7 +29,7 @@ public slots:
     void removeEndPosition();
 
     void addArea(const QPointF& center);
-    void addArea(const QPolygonF& poly);
+    void addArea(const TaskArea &area);
 
 private slots:
     void handleStartPositionObjectPosChanged();
@@ -45,6 +45,7 @@ private:
     QPointer<MapGraphicsObject> _startPositionObject;
     QPointer<MapGraphicsObject> _endPositionObject;
 
+    //We store the Task Area's current position so we can tell
     QHash<TaskAreaObject *, QPolygonF> _areas;
     
 };

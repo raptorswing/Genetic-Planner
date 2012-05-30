@@ -1,52 +1,15 @@
 #include "PlanningProblem.h"
 
-#include "FlyThroughTask.h"
-#include "EndingTask.h"
-#include "NoFlyTask.h"
+#include "tasks/FlyThroughTask.h"
+#include "tasks/EndingTask.h"
+#include "tasks/NoFlyTask.h"
 
 #include <QtDebug>
 
 PlanningProblem::PlanningProblem()
 {
-    _isStartingDefined = false;
-    _isEndingDefined = false;
-}
-
-PlanningProblem::PlanningProblem(const UAVParameters &uavParams, const SensorDefinition &sensorParams)
-{
-    this->setUAVSettings(uavParams);
-    this->setSensorSettings(sensorParams);
-
-    _isStartingDefined = false;
-    _isEndingDefined = false;
-}
-
-PlanningProblem::PlanningProblem(const PlanningProblem &other)
-{
-    _isStartingDefined = false;
-    _isEndingDefined = false;
-
-
-    //Starting and end position
-    if (other.isStartingDefined())
-        this->setStartingPos(other.startingPos(),other.startingAlt());
-
-    //The ending point will define the ending task for us, too
-    if (other.isEndingDefined())
-        this->setEndingPos(other.endingPos(),other.endingAlt());
-
-    //UAV and sensor settings
-    this->setUAVSettings(other.uavSettings());
-    this->setSensorSettings(other.sensorSettings());
-
-    //Copy Tasks
-    foreach(QSharedPointer<PathTask> task, other.tasks())
-        this->addTask(task->copy());
-    foreach(QSharedPointer<PathTask> task, other.secondaryTasks())
-        this->addTask(task->copy(),true);
-
-    //Areas
-    _areas = other.areas();
+    _startIsDefined = false;
+    _endIsDefined = false;
 }
 
 PlanningProblem::~PlanningProblem()
@@ -56,246 +19,205 @@ PlanningProblem::~PlanningProblem()
 
 bool PlanningProblem::isReady() const
 {
-    return (this->isStartingDefined());
+    return (this->isStartDefined());
 }
 
 qreal PlanningProblem::fitness(QSharedPointer<Individual> individual)
 {
-    if (!this->isReady())
-        return 0.0;
-
     qreal toRet = 0.0;
+    qreal shortnessBonus = 0.0;
+    if (!this->isReady())
+        return toRet;
 
-    //Get the geo points of the path and run them all through our tasks!
-    QList<QPointF> geoPositions = individual->generateGeoPoints(this->startingPos());
+    QList<Position> positions = individual->generatePositions(this->startingPosition());
 
-    foreach(QSharedPointer<PathTask> task, _tasks)
+    foreach(QSharedPointer<TaskArea> area, this->areas())
     {
-        qreal temp = task->performance(geoPositions);
-        toRet += temp;
+        foreach(QSharedPointer<PathTask> task, area->tasks())
+        {
+            qreal score = task->performance(positions);
+            toRet += score;
+            if (task->shortnessRewardApplies())
+                shortnessBonus += (score / positions.size());
+
+        }
     }
 
-    //Do the "ending task" if applicable
-    if (_endingTask)
-        toRet += _endingTask->performance(geoPositions);
-
-    //Punish long paths
-    {
-        qreal shortReward = 10 * toRet / geoPositions.length();
-        toRet += shortReward;
-    }
-
-    /*
-      We add reward for secondary tasks after the "long path punishment" to avoid amplifying reward from
-      simply not flying somewhere.
-    */
-    foreach(QSharedPointer<PathTask> task, _secondaryTasks)
-        toRet += task->performance(geoPositions);
-
+    toRet += shortnessBonus;
     return toRet;
 }
 
-UAVParameters PlanningProblem::uavSettings() const
-{
-    return _uavSettings;
-}
-
-SensorDefinition PlanningProblem::sensorSettings() const
-{
-    return _sensorSettings;
-}
-
-bool PlanningProblem::isStartingDefined() const
-{
-    return _isStartingDefined;
-}
-
-QPointF PlanningProblem::startingPos() const
-{
-    return _startingPos;
-}
-
-qreal PlanningProblem::startingAlt() const
-{
-    return _startingAlt;
-}
-
-void PlanningProblem::clearStartingPos()
-{
-    _isStartingDefined = false;
-}
-
-bool PlanningProblem::isEndingDefined() const
-{
-    return _isEndingDefined;
-}
-
-QPointF PlanningProblem::endingPos() const
-{
-    return _endingPos;
-}
-
-qreal PlanningProblem::endingAlt() const
-{
-    return _endingAlt;
-}
-
-void PlanningProblem::clearEndingPos()
-{
-    _isEndingDefined = false;
-    _endingTask.clear();
-}
-
-void PlanningProblem::setUAVSettings(const UAVParameters &uavParams)
-{
-    _uavSettings = uavParams;
-}
-
-void PlanningProblem::setSensorSettings(const SensorDefinition &sensorParams)
-{
-    _sensorSettings = sensorParams;
-}
-
-void PlanningProblem::setStartingPos(QPointF startingPos, qreal startingAlt)
-{
-    _startingPos = startingPos;
-    _startingAlt = startingAlt;
-    _isStartingDefined = true;
-}
-
-void PlanningProblem::setEndingPos(QPointF endingPos, qreal endingAlt)
-{
-    _endingPos = endingPos;
-    _endingAlt = endingAlt;
-    _isEndingDefined = true;
-
-    if (_endingTask.isNull())
-        _endingTask = QSharedPointer<EndingTask>(new EndingTask(endingPos,15.0));
-    else
-        _endingTask->setEndingPos(endingPos);
-}
-
-void PlanningProblem::addTask(QSharedPointer<PathTask> pathTask, bool secondary)
-{
-    if (!pathTask)
-        return;
-
-    if (!secondary)
-        _tasks.append(pathTask);
-    else
-        _secondaryTasks.append(pathTask);
-}
-
-QList<QSharedPointer<PathTask> > PlanningProblem::tasks() const
-{
-    return _tasks;
-}
-
-QList<QSharedPointer<PathTask> > PlanningProblem::secondaryTasks() const
-{
-    return _secondaryTasks;
-}
-
-void PlanningProblem::addArea(const QPolygonF &geoPoly)
-{
-    _areas.insert(geoPoly);
-    if (!_areas.contains(geoPoly))
-        qWarning() << "Insertion of" << geoPoly << "failed";
-
-    QSharedPointer<FlyThroughTask> task(new FlyThroughTask(geoPoly,1550));
-    this->addTask(task);
-}
-
-void PlanningProblem::setAreas(const QSet<QPolygonF> &toSet)
-{
-    _areas = toSet;
-}
-
-void PlanningProblem::removeArea(const QPolygonF &toRemove)
-{
-    if (!_areas.remove(toRemove))
-        qWarning() << this << "failed to remove area" << toRemove << ". Size is now" << _areas.size();
-}
-
-QSet<QPolygonF> PlanningProblem::areas() const
+QSet<QSharedPointer<TaskArea> > PlanningProblem::areas() const
 {
     return _areas;
 }
 
+bool PlanningProblem::isStartDefined() const
+{
+    return _startIsDefined;
+}
+
+Position PlanningProblem::startingPosition() const
+{
+    return _startPos;
+}
+
+bool PlanningProblem::isEndDefined() const
+{
+    return _endIsDefined;
+}
+
+Position PlanningProblem::endingPosition() const
+{
+    return _endPos;
+}
+
+//public slot
+void PlanningProblem::addArea(QSharedPointer<TaskArea> area)
+{
+    if (area.isNull())
+        return;
+
+    TaskArea * rawArea = area.data();
+    connect(rawArea,
+            SIGNAL(changed()),
+            this,
+            SIGNAL(changed()));
+
+    _areas.insert(area);
+    this->areaAdded(area);
+    this->changed();
+}
+
+//public slot
+void PlanningProblem::removeArea(QSharedPointer<TaskArea> area)
+{
+    if (area.isNull())
+        return;
+
+    _areas.remove(area);
+    this->changed();
+}
+
+//public slot
+void PlanningProblem::setStartPosition(const Position &pos)
+{
+    _startPos = pos;
+    _startIsDefined = true;
+
+    this->startPositionChanged(pos);
+    this->changed();
+}
+
+//public slot
+void PlanningProblem::clearStartPosition()
+{
+    _startIsDefined = false;
+    this->startPositionRemoved();
+    this->changed();
+    qDebug() << "Start Area Cleared";
+}
+
+//public slot
+void PlanningProblem::setEndPosition(const Position &pos)
+{
+    _endPos = pos;
+    _endIsDefined = true;
+    this->endPositionChanged(pos);
+    this->changed();
+}
+
+//public slot
+void PlanningProblem::clearEndPosition()
+{
+    _endIsDefined = false;
+    this->endPositionRemoved();
+    this->changed();
+    qDebug() << "End Area Cleared";
+}
+
+//private
+PlanningProblem::PlanningProblem(const PlanningProblem &other)
+{
+    Q_UNUSED(other)
+    qWarning() << "Warning: disabled copy constructor called";
+}
+
+//private
+PlanningProblem &PlanningProblem::operator =(const PlanningProblem &other)
+{
+    Q_UNUSED(other)
+    qDebug() << "Warning: disabled assignment operator used";
+    return *this;
+}
+
 QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
 {
-    stream << problem.uavSettings();
-    stream << problem.sensorSettings();
+    //Areas
+    {
+        QSet<QSharedPointer<TaskArea> > areas = problem.areas();
+        int numAreas = areas.size();
 
-    stream << problem.isStartingDefined();
-    stream << problem.startingPos();
-    stream << problem.startingAlt();
+        stream << numAreas;
+        foreach(QSharedPointer<TaskArea> area, areas)
+            stream << *area.data();
+    }
 
-    stream << problem.isEndingDefined();
-    stream << problem.endingPos();
-    stream << problem.endingAlt();
+    //Starting position
+    {
+        stream << problem.isStartDefined();
+        stream << problem.startingPosition();
+    }
 
-    stream << problem.areas();
-
-    stream << problem.tasks();
-    stream << problem.secondaryTasks();
+    //Ending position
+    {
+        stream << problem.isEndDefined();
+        stream << problem.endingPosition();
+    }
 
     return stream;
 }
 
 QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem)
 {
-    UAVParameters uavSettings;
-    stream >> uavSettings;
+    //Areas
+    {
+        int numAreas;
+        stream >> numAreas;
 
-    SensorDefinition sensorSettings;
-    stream >> sensorSettings;
+        for (int i = 0; i < numAreas; i++)
+        {
+            QSharedPointer<TaskArea> area(new TaskArea(QPolygonF()));
+            stream >> *area;
+            problem.addArea(area);
+        }
+    }
 
-    bool isStartingDefined;
-    stream >> isStartingDefined;
+    //Starting Position
+    {
+        bool isDefined;
+        Position pos;
+        stream >> isDefined;
+        stream >> pos;
 
-    QPointF startingPos;
-    stream >> startingPos;
+        if (isDefined)
+            problem.setStartPosition(pos);
+        else
+            problem.clearStartPosition();
+    }
 
-    qreal startingAlt;
-    stream >> startingAlt;
+    //Ending Position
+    {
+        bool isDefined;
+        Position pos;
+        stream >> isDefined;
+        stream >> pos;
 
-    bool isEndingDefined;
-    stream >> isEndingDefined;
-
-    QPointF endingPos;
-    stream >> endingPos;
-
-    qreal endingAlt;
-    stream >> endingAlt;
-
-    problem.setUAVSettings(uavSettings);
-    problem.setSensorSettings(sensorSettings);
-
-    if (isStartingDefined)
-        problem.setStartingPos(startingPos,startingAlt);
-    else
-        problem.clearStartingPos();
-
-    if (isEndingDefined)
-        problem.setEndingPos(endingPos,endingAlt);
-    else
-        problem.clearEndingPos();
-
-    QSet<QPolygonF> areas;
-    stream >> areas;
-    problem.setAreas(areas);
-
-    QList<QSharedPointer<PathTask> > primaryTasks;
-    stream >> primaryTasks;
-    foreach(QSharedPointer<PathTask> task, primaryTasks)
-        problem.addTask(task);
-
-    QList<QSharedPointer<PathTask> > secondaryTasks;
-    stream >> secondaryTasks;
-    foreach(QSharedPointer<PathTask> task, secondaryTasks)
-        problem.addTask(task,true);
-
+        if (isDefined)
+            problem.setEndPosition(pos);
+        else
+            problem.clearEndPosition();
+    }
 
     return stream;
 }
@@ -324,35 +246,3 @@ QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem
     return stream;
 }
 
-bool operator==(const QPolygonF& A, const QPolygonF& B)
-{
-    if (A.size() != B.size())
-        return false;
-
-    for (int i = 0; i < A.size(); i++)
-    {
-        QPointF a = A[i];
-        QPointF b = B[i];
-        if (a != b)
-            return false;
-    }
-
-    return true;
-}
-
-bool operator!=(const QPolygonF& A, const QPolygonF& B)
-{
-    return !(A == B);
-}
-
-uint qHash(const QPolygonF& poly)
-{
-    uint toRet = 0;
-
-    for (int i = 0; i < poly.size(); i++)
-    {
-        const QPointF& pos = poly.at(i);
-        toRet ^= qRound(pos.x() + pos.y());
-    }
-    return toRet;
-}

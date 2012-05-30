@@ -17,8 +17,7 @@
 #include "PlanningControlWidget.h"
 #include "Planner.h"
 #include "PlanningWizard.h"
-#include "NoFlyTask.h"
-#include "gui/commands/SetProblemCommand.h"
+#include "tasks/NoFlyTask.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -31,8 +30,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _view = new MapGraphicsView(_scene,this);
     this->setCentralWidget(_view);
 
-    _adapter = new PlanningProblemDisplayAdapter(PlanningProblem(), _scene, this);
-    _planner = new Planner(_adapter->planningProblem(),this);
+    _planner = new Planner(QSharedPointer<PlanningProblem>(new PlanningProblem()),
+                           this);
+    _adapter = new ProblemModelAdapter(_scene,this);
 
     //Setup tile sources for the MapGraphicsView
     QSharedPointer<CompositeTileSource> composite(new CompositeTileSource());
@@ -43,11 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
     _view->setTileSource(composite);
 
     //Zoom into BYU campus by default
-    /*
+
     QPointF place(-111.649253,40.249707);
     _view->setZoomLevel(15);
     _view->centerOn(place);
-    */
+
 
     //Provide our "map layers" dock widget with the composite tile source to be configured
     this->ui->mapLayersWidget->setComposite(composite);
@@ -95,6 +95,11 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(handleMWCommandExecuted()));
 
     connect(_planner,
+            SIGNAL(newProblemSet(QSharedPointer<PlanningProblem>)),
+            this,
+            SLOT(handleNewProblemSet(QSharedPointer<PlanningProblem>)));
+
+    connect(_planner,
             SIGNAL(planningStarted()),
             this->ui->planningControlWidget,
             SLOT(setIsRunning()));
@@ -110,14 +115,6 @@ MainWindow::MainWindow(QWidget *parent) :
             SIGNAL(iterationFinished(int,qreal)),
             this->ui->planningControlWidget,
             SLOT(setPlanningProgress(int,qreal)));
-    connect(_adapter,
-            SIGNAL(problemHasChanged(const PlanningProblem&)),
-            _planner,
-            SLOT(clearPlanning()));
-    connect(_adapter,
-            SIGNAL(problemHasChanged(PlanningProblem)),
-            _planner,
-            SLOT(setProblem(PlanningProblem)));
     connect(_planner,
             SIGNAL(planningPaused()),
             this,
@@ -126,6 +123,8 @@ MainWindow::MainWindow(QWidget *parent) :
             SIGNAL(planningCleared()),
             this,
             SLOT(handlePlanningCleared()));
+
+    this->handleNewProblemSet(_planner->problem());
 
     //Spawn a helpful wizard!
     /*
@@ -145,7 +144,7 @@ MainWindow::~MainWindow()
 //private slot
 void MainWindow::handlePlanningControlStartRequested()
 {
-    if (!_adapter->planningProblem().isReady())
+    if (!_planner->problem()->isReady())
     {
         QMessageBox::information(this,
                                  "Can't plan - Problem not defined",
@@ -173,19 +172,37 @@ void MainWindow::handlePlanningControlResetRequested()
 //private slot
 void MainWindow::handleStartPointAddRequested()
 {    
-    _adapter->setStartPosition(_view->center(),1500);
+    Position position(_view->center(),
+                      1500);
+    _planner->problem()->setStartPosition(position);
 }
 
 //private slot
 void MainWindow::handleEndPointAddRequested()
 {
-    _adapter->setEndPosition(_view->center(),1500);
+    Position position(_view->center(),
+                      1500);
+    _planner->problem()->setEndPosition(position);
 }
 
 //private slot
 void MainWindow::handleTaskAreaAddRequested()
 {
-    _adapter->addArea(_view->center());
+    qreal delta = 0.001;
+    QPointF center = _view->center();
+    QPointF A(center.x() - delta,
+              center.y() + delta);
+    QPointF B(center.x() + delta,
+              center.y() + delta);
+    QPointF C(center.x() + delta,
+              center.y() - delta);
+    QPointF D(center.x() - delta,
+              center.y() - delta);
+
+    QPolygonF poly;
+    poly << A << B << C << D;
+    QSharedPointer<TaskArea> area(new TaskArea(poly));
+    _planner->problem()->addArea(area);
 }
 
 //private slot
@@ -194,27 +211,40 @@ void MainWindow::handlePlanningPaused()
     //Get the path that is currently best
     QSharedPointer<Individual> currentBest = _planner->getCurrentBest();
 
-    //Preview it
+    //Remove old preview data if needed
     foreach(MapGraphicsObject * oldPreviewObj, _pathPreviewObjects)
         oldPreviewObj->deleteLater();
     _pathPreviewObjects.clear();
 
-    foreach(QPointF geoPos, currentBest->generateGeoPoints(_planner->problem().startingPos()))
+
+    foreach(Position geoPos, currentBest->generatePositions(_planner->problem()->startingPosition()))
     {
         CircleObject * circle = new CircleObject(4.0,
                                                  false,
                                                  Qt::yellow);
-        circle->setPos(geoPos);
+        circle->setPos(geoPos.lonLat());
         _pathPreviewObjects.insert(circle);
         _scene->addObject(circle);
     }
+
 }
 
+//private slot
 void MainWindow::handlePlanningCleared()
 {
     foreach(MapGraphicsObject * oldPreviewObj, _pathPreviewObjects)
         oldPreviewObj->deleteLater();
     _pathPreviewObjects.clear();
+}
+
+//private slot
+void MainWindow::handleNewProblemSet(QSharedPointer<PlanningProblem> problem)
+{
+    if (problem.isNull())
+        return;
+
+    _adapter->setProblem(problem.toWeakRef());
+    this->handlePlanningCleared();
 }
 
 //private slot
@@ -270,7 +300,7 @@ void MainWindow::on_actionRedo_triggered()
 void MainWindow::on_actionNew_triggered()
 {
     //Another great place to ask them if they want to save their current doc
-    _adapter->setPlanningProblem(PlanningProblem());
+    _planner->setProblem(QSharedPointer<PlanningProblem>(new PlanningProblem()));
 
     _openFile.clear();
 }
@@ -303,23 +333,15 @@ void MainWindow::on_actionOpen_triggered()
     }
 
     QDataStream stream(&fp);
-    PlanningProblem toRead;
-    stream >> toRead;
-
-    _adapter->setPlanningProblem(toRead);
+    QSharedPointer<PlanningProblem> toRead(new PlanningProblem());
+    _planner->setProblem(toRead);
+    stream >> *toRead;
 
     _openFile = fileToReadPath;
 
     QMessageBox::information(this,
                              "Success",
                              "Loaded file successfully");
-
-    if (_adapter->planningProblem().isStartingDefined())
-    {
-        if (_view->zoomLevel() < 10)
-            _view->setZoomLevel(15);
-        _view->centerOn(_adapter->planningProblem().startingPos());
-    }
 }
 
 //private slot
@@ -341,7 +363,7 @@ void MainWindow::on_actionSave_Planning_Problem_triggered()
     }
 
     QDataStream stream(&fp);
-    stream << _adapter->planningProblem();
+    stream << *(_planner->problem());
 
     QMessageBox::information(this,
                              "Success",
@@ -365,7 +387,7 @@ void MainWindow::on_actionSave_As_triggered()
 void MainWindow::on_actionClose_triggered()
 {
     //This would be a great place to ask if they want to save
-    _adapter->setPlanningProblem(PlanningProblem());
+    _planner->setProblem(QSharedPointer<PlanningProblem>(new PlanningProblem()));
     _openFile.clear();
 }
 

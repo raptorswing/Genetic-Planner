@@ -10,9 +10,9 @@
 #include "MapGraphicsScene.h"
 #include "MapGraphicsView.h"
 #include "CircleObject.h"
-#include "PlanningProblemDisplayAdapter.h"
 #include "MWCommand.h"
 #include "Planner.h"
+#include "ProblemModelAdapter.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +38,7 @@ private slots:
     void handleTaskAreaAddRequested();
     void handlePlanningPaused();
     void handlePlanningCleared();
+    void handleNewProblemSet(QSharedPointer<PlanningProblem> problem);
 
     void undo();
     void redo();
@@ -68,10 +69,8 @@ private:
     MapGraphicsScene * _scene;
     MapGraphicsView * _view;
 
-    //This guy maps the "model" of the PlanningProblem to the "view" of the MapGraphics scene and view
-    PlanningProblemDisplayAdapter * _adapter;
-
     Planner * _planner;
+    ProblemModelAdapter * _adapter;
 
     QSet<MapGraphicsObject *> _pathPreviewObjects;
 

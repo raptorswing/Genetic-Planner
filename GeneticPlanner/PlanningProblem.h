@@ -7,72 +7,68 @@
 #include <QDataStream>
 #include <QSet>
 #include <QSharedPointer>
+#include <QObject>
 
 #include "UAVParameters.h"
 #include "SensorDefinition.h"
 #include "Individual.h"
-#include "PathTask.h"
+#include "tasks/PathTask.h"
 #include "PolygonObject.h"
-#include "EndingTask.h"
+#include "tasks/EndingTask.h"
+#include "TaskArea.h"
+#include "Position.h"
 
-class PlanningProblem
+class PlanningProblem : public QObject
 {
+    Q_OBJECT
 public:
     PlanningProblem();
-    PlanningProblem(const UAVParameters& uavParams,
-                    const SensorDefinition& sensorParams);
-    PlanningProblem(const PlanningProblem& other);
     ~PlanningProblem();
 
     bool isReady() const;
 
     qreal fitness(QSharedPointer<Individual> individual);
 
-    UAVParameters uavSettings() const;
-    SensorDefinition sensorSettings() const;
+    QSet<QSharedPointer<TaskArea> > areas() const;
 
-    bool isStartingDefined() const;
-    QPointF startingPos() const;
-    qreal startingAlt() const;
-    void clearStartingPos();
+    bool isStartDefined() const;
+    Position startingPosition() const;
 
-    bool isEndingDefined() const;
-    QPointF endingPos() const;
-    qreal endingAlt() const;
-    void clearEndingPos();
+    bool isEndDefined() const;
+    Position endingPosition() const;
 
-    void setUAVSettings(const UAVParameters& uavParams);
-    void setSensorSettings(const SensorDefinition& sensorParams);
+public slots:
+    void addArea(QSharedPointer<TaskArea> area);
+    void removeArea(QSharedPointer<TaskArea> area);
 
-    void setStartingPos(QPointF startingPos,qreal startingAlt=1423);
-    void setEndingPos(QPointF endingPos, qreal endingAlt=1423);
+    void setStartPosition(const Position& pos);
+    void clearStartPosition();
 
-    void addTask(QSharedPointer<PathTask> pathTask,bool secondary=false);
-    QList<QSharedPointer<PathTask> > tasks() const;
-    QList<QSharedPointer<PathTask> > secondaryTasks() const;
+    void setEndPosition(const Position& pos);
+    void clearEndPosition();
 
-    void addArea(const QPolygonF& geoPoly);
-    void setAreas(const QSet<QPolygonF>& toSet);
-    void removeArea(const QPolygonF& toRemove);
-    QSet<QPolygonF> areas() const;
+signals:
+    void changed();
+
+    void startPositionChanged(const Position& pos);
+    void endPositionChanged(const Position& pos);
+
+    void startPositionRemoved();
+    void endPositionRemoved();
+
+    void areaAdded(QSharedPointer<TaskArea> area);
 
 private:
-    UAVParameters _uavSettings;
-    SensorDefinition _sensorSettings;
+    PlanningProblem(const PlanningProblem& other);
+    PlanningProblem& operator=(const PlanningProblem& other);
 
-    bool _isStartingDefined;
-    QPointF _startingPos;
-    qreal _startingAlt;
+    QSet<QSharedPointer<TaskArea> > _areas;
 
-    bool _isEndingDefined;
-    QPointF _endingPos;
-    qreal _endingAlt;
+    Position _startPos;
+    bool _startIsDefined;
 
-    QList<QSharedPointer<PathTask> > _tasks;
-    QList<QSharedPointer<PathTask> > _secondaryTasks;
-    QSharedPointer<EndingTask> _endingTask;
-
-    QSet<QPolygonF> _areas;
+    Position _endPos;
+    bool _endIsDefined;
 };
 
 QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem);
@@ -80,8 +76,9 @@ QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem);
 QDataStream & operator<< (QDataStream& stream, const QSharedPointer<PathTask>& problem);
 QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem);
 
-bool operator==(const QPolygonF& A, const QPolygonF& B);
-bool operator!=(const QPolygonF& A, const QPolygonF& B);
-uint qHash(const QPolygonF& poly);
+
+bool operator==(const TaskArea& A, const TaskArea& B);
+bool operator!=(const TaskArea& A, const TaskArea& B);
+uint qHash(const TaskArea& area);
 
 #endif // PLANNINGPROBLEM_H

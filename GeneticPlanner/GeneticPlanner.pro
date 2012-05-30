@@ -22,15 +22,19 @@ SOURCES += main.cpp\
     gui/PlanningControlWidget.cpp \
     gui/PlanningWizard.cpp \
     PlanningProblem.cpp \
-    PathTask.cpp \
-    FlyThroughTask.cpp \
+    tasks/PathTask.cpp \
+    tasks/FlyThroughTask.cpp \
     gui/PaletteWidget.cpp \
-    EndingTask.cpp \
-    NoFlyTask.cpp \
+    tasks/EndingTask.cpp \
+    tasks/NoFlyTask.cpp \
     TaskAreaObject.cpp \
     gui/MWCommand.cpp \
-    gui/PlanningProblemDisplayAdapter.cpp \
-    gui/commands/SetProblemCommand.cpp
+    TaskArea.cpp \
+    Position.cpp \
+    Pose.cpp \
+    ProblemModelAdapter.cpp \
+    gui/TaskAreaObjectEditWidget.cpp \
+    gui/TaskAreaListModel.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -43,22 +47,27 @@ HEADERS  += gui/MainWindow.h \
     gui/PlanningControlWidget.h \
     gui/PlanningWizard.h \
     PlanningProblem.h \
-    PathTask.h \
-    FlyThroughTask.h \
+    tasks/PathTask.h \
+    tasks/FlyThroughTask.h \
     gui/PaletteWidget.h \
-    EndingTask.h \
-    NoFlyTask.h \
+    tasks/EndingTask.h \
+    tasks/NoFlyTask.h \
     TaskAreaObject.h \
     gui/MWCommand.h \
-    gui/PlanningProblemDisplayAdapter.h \
-    gui/commands/SetProblemCommand.h
+    TaskArea.h \
+    Position.h \
+    Pose.h \
+    ProblemModelAdapter.h \
+    gui/TaskAreaObjectEditWidget.h \
+    gui/TaskAreaListModel.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \
     gui/SensorParametersWidget.ui \
     gui/PlanningControlWidget.ui \
     gui/PlanningWizard.ui \
-    gui/PaletteWidget.ui
+    gui/PaletteWidget.ui \
+    gui/TaskAreaObjectEditWidget.ui
 
 #Linkage for MapGraphics library
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../MapGraphics/release/ -lMapGraphics

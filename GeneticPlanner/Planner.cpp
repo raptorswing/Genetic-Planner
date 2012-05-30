@@ -14,8 +14,8 @@
 const qreal PI = 3.1415926535897932384626433;
 const qreal SQRT2PI = sqrt(2.0*PI);
 
-Planner::Planner(const PlanningProblem &problem, QObject *parent) :
-    QObject(parent), _problem(problem)
+Planner::Planner(QSharedPointer<PlanningProblem> problem, QObject *parent) :
+    QObject(parent)
 {
     qsrand(QDateTime::currentDateTime().toTime_t() ^ qHash(QHostInfo::localHostName()));
 
@@ -30,6 +30,8 @@ Planner::Planner(const PlanningProblem &problem, QObject *parent) :
             SIGNAL(timeout()),
             this,
             SLOT(doIteration()));
+
+    this->setProblem(problem);
 }
 
 Planner::~Planner()
@@ -51,16 +53,22 @@ qreal Planner::getBestFitnessSoFar() const
     return _bestFitnessSoFar;
 }
 
-PlanningProblem Planner::problem() const
+QSharedPointer<PlanningProblem> Planner::problem() const
 {
     return _problem;
 }
 
 //public slot
-void Planner::setProblem(const PlanningProblem &problem)
+void Planner::setProblem(QSharedPointer<PlanningProblem> problem)
 {
     this->clearPlanning();
     _problem = problem;
+    this->newProblemSet(problem);
+
+    connect(problem.data(),
+            SIGNAL(changed()),
+            this,
+            SLOT(clearPlanning()));
 }
 
 //public slot
@@ -126,7 +134,7 @@ void Planner::doIteration()
     QList<FitnessRunnable  *> runnables;
     foreach(QSharedPointer<Individual> ind, newIndividuals)
     {
-        FitnessRunnable * runnable = new FitnessRunnable(&_problem,ind);
+        FitnessRunnable * runnable = new FitnessRunnable(_problem,ind);
         runnables.append(runnable);
         pool->start(runnable);
     }

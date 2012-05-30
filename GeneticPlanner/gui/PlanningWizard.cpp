@@ -9,10 +9,12 @@ PlanningWizard::PlanningWizard(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /*
     this->ui->uavParams->setValues(_problem.uavSettings(),
                                    _problem.uavSettings());
     this->ui->sensorParams->setValues(_problem.sensorSettings(),
                                       _problem.sensorSettings());
+                                      */
     this->ui->uavParams->setHideCancelAndApply(true);
     this->ui->sensorParams->setHideCancelAndApply(true);
 
@@ -35,14 +37,20 @@ PlanningWizard::~PlanningWizard()
 //private slot
 void PlanningWizard::handlePageChanged(int newPageID)
 {
+    Q_UNUSED(newPageID)
     //If the user advances to the next page, use the UAV values they set even if they didn't "apply" them.
+    /*
     if (newPageID == 1)
         _problem.setUAVSettings(this->ui->uavParams->current());
+        */
 }
 
 //private slot
 void PlanningWizard::handleFinished(int result)
 {
+    Q_UNUSED(result)
+    /*
     if (result == 1)
         _problem.setSensorSettings(this->ui->sensorParams->current());
+        */
 }

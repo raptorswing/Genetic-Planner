@@ -9,7 +9,7 @@ public:
     EndingTask(const QPointF& endingPos, const qreal& endingAlt, qreal withinDistance=15.0);
     EndingTask(QDataStream& stream);
 
-    virtual qreal performance(const QList<QPointF>& positions);
+    virtual qreal performance(const QList<Position>& positions);
 
     virtual QString taskType() const;
 

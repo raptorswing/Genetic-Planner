@@ -3,7 +3,7 @@
 #include "PlanningProblem.h"
 #include "Individual.h"
 
-FitnessRunnable::FitnessRunnable(PlanningProblem * problem,QSharedPointer<Individual> individual) :
+FitnessRunnable::FitnessRunnable(QSharedPointer<PlanningProblem> problem,QSharedPointer<Individual> individual) :
     _problem(problem), _individual(individual)
 {
     this->setAutoDelete(false);
