@@ -40,6 +40,8 @@ void ProblemModelAdapter::setProblem(QWeakPointer<PlanningProblem> problem)
     if (problem.isNull())
         return;
 
+    _objectToArea.clear();
+
     PlanningProblem * raw = problem.data();
 
 
@@ -185,4 +187,37 @@ void ProblemModelAdapter::handleAreaAdded(QSharedPointer<TaskArea> area)
 {
     TaskAreaObject * obj = new TaskAreaObject(area.toWeakRef());
     _scene->addObject(obj);
+
+    _objectToArea.insert(obj,area.toWeakRef());
+
+    connect(obj,
+            SIGNAL(destroyed()),
+            this,
+            SLOT(handleAreaObjectDestroyed()));
+}
+
+void ProblemModelAdapter::handleAreaObjectDestroyed()
+{
+    QSharedPointer<PlanningProblem> strongProblem = _problem.toStrongRef();
+    if (strongProblem.isNull())
+        return;
+
+    QObject * sender = QObject::sender();
+    if (!sender)
+        return;
+
+    /*
+     Don't do anything with this pointer! At this point TaskAreaObject's destructor has
+     finished and QObject's destructor is running.
+    */
+    TaskAreaObject * obj = (TaskAreaObject *)sender;
+
+    if (!_objectToArea.contains(obj))
+        return;
+
+    QWeakPointer<TaskArea> weakArea = _objectToArea.take(obj);
+    QSharedPointer<TaskArea> area = weakArea.toStrongRef();
+
+    if (!area.isNull())
+        strongProblem->removeArea(area);
 }

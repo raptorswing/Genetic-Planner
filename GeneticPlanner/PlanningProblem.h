@@ -57,6 +57,7 @@ signals:
     void endPositionRemoved();
 
     void areaAdded(QSharedPointer<TaskArea> area);
+    void areaRemoved(QSharedPointer<TaskArea> area);
 
 private:
     PlanningProblem(const PlanningProblem& other);

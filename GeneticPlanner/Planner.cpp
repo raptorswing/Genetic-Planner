@@ -19,9 +19,9 @@ Planner::Planner(QSharedPointer<PlanningProblem> problem, QObject *parent) :
 {
     qsrand(QDateTime::currentDateTime().toTime_t() ^ qHash(QHostInfo::localHostName()));
 
-    _mutantCount = 150;
-    _breedCount = 15;
-    _keepCount = 25;
+    _mutantCount = 200;
+    _breedCount = 5;
+    _keepCount = 20;
     _bestFitnessSoFar = 0.0;
     _iterationCounter = 0;
 

@@ -4,10 +4,12 @@
 #include <QObject>
 #include <QWeakPointer>
 #include <QPointer>
+#include <QHash>
 
 #include "PlanningProblem.h"
 #include "MapGraphicsScene.h"
 #include "CircleObject.h"
+class TaskAreaObject;
 
 class ProblemModelAdapter : public QObject
 {
@@ -20,6 +22,8 @@ private:
     QWeakPointer<PlanningProblem> _problem;
     QPointer<CircleObject> _startMarker;
     QPointer<CircleObject> _endMarker;
+
+    QHash<TaskAreaObject *, QWeakPointer<TaskArea> > _objectToArea;
 
 
     
@@ -42,6 +46,7 @@ private slots:
     void handleEndMarkerDestroyed();
 
     void handleAreaAdded(QSharedPointer<TaskArea> area);
+    void handleAreaObjectDestroyed();
     
 };
 

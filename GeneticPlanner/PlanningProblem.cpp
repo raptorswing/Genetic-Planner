@@ -96,6 +96,8 @@ void PlanningProblem::removeArea(QSharedPointer<TaskArea> area)
         return;
 
     _areas.remove(area);
+
+    this->areaRemoved(area);
     this->changed();
 }
 
