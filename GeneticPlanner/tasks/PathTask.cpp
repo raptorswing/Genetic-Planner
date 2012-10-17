@@ -19,7 +19,7 @@ bool PathTask::shortnessRewardApplies() const
     return true;
 }
 
-QPolygonF PathTask::geoPoly() const
+const QPolygonF &PathTask::geoPoly() const
 {
     return _geoPoly;
 }
@@ -36,5 +36,5 @@ qreal PathTask::normal(qreal x, qreal stdDev, qreal scaleFactor)
 void PathTask::setGeoPoly(const QPolygonF &newPoly)
 {
     _geoPoly = newPoly;
-    this->changed();
+    this->pathTaskChanged();
 }

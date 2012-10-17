@@ -27,7 +27,7 @@ public slots:
     void setGeoPoly(const QPolygonF& geoPoly);
 
 signals:
-    void changed();
+    void taskAreaChanged();
     void geoPolyChanged(const QPolygonF& geoPoly);
 
 

@@ -27,10 +27,10 @@ public:
 
     virtual bool shortnessRewardApplies() const;
 
-    QPolygonF geoPoly() const;
+    const QPolygonF & geoPoly() const;
 
 signals:
-    void changed();
+    void pathTaskChanged();
 
 protected:
     static qreal normal(qreal x, qreal stdDev,qreal scaleFactor=1000.0);

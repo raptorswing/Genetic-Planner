@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     Pose.cpp \
     ProblemModelAdapter.cpp \
     gui/TaskAreaObjectEditWidget.cpp \
-    gui/TaskAreaListModel.cpp
+    gui/TaskAreaListModel.cpp \
+    tasks/CompleteCoverageTask.cpp
 
 HEADERS  += gui/MainWindow.h \
     Individual.h \
@@ -59,7 +60,8 @@ HEADERS  += gui/MainWindow.h \
     Pose.h \
     ProblemModelAdapter.h \
     gui/TaskAreaObjectEditWidget.h \
-    gui/TaskAreaListModel.h
+    gui/TaskAreaListModel.h \
+    tasks/CompleteCoverageTask.h
 
 FORMS    += gui/MainWindow.ui \
     gui/UAVParametersWidget.ui \

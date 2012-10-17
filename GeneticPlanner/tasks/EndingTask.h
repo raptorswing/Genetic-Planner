@@ -6,7 +6,7 @@
 class EndingTask : public PathTask
 {
 public:
-    EndingTask(const QPointF& endingPos, const qreal& endingAlt, qreal withinDistance=15.0);
+    EndingTask(const QPolygonF &geoPoly);
     EndingTask(QDataStream& stream);
 
     virtual qreal performance(const QList<Position>& positions);
@@ -17,12 +17,13 @@ public:
 
     virtual void serialize(QDataStream& stream);
 
-    void setEndingPos(QPointF endingPos);
+    virtual bool shortnessRewardApplies() const;
+
+    void setEndingArea(const QPolygonF &area);
 
 private:
-    QPointF _endingPos;
-    qreal _endingAlt;
-    qreal _stdDev;
+    QPolygonF _area;
+    qreal _alt;
 };
 
 #endif // ENDINGTASK_H

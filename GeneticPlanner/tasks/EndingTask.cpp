@@ -4,31 +4,30 @@
 
 #include "guts/Conversions.h"
 
-EndingTask::EndingTask(const QPointF &endingPos, const qreal& endingAlt, qreal withinDistance) :
-    _endingPos(endingPos), _endingAlt(endingAlt), _stdDev(withinDistance)
+EndingTask::EndingTask(const QPolygonF& geoPoly) :
+    PathTask(geoPoly)
 {
 }
 
 EndingTask::EndingTask(QDataStream &stream)
 {
-    stream >> _endingPos;
-    stream >> _endingAlt;
-    stream >> _stdDev;
+    stream >> _area;
 }
 
 qreal EndingTask::performance(const QList<Position> &positions)
 {
     qreal goalScore = 0.0;
-    const QPointF goalPoint = _endingPos;
+    const QPointF goalPoint = this->geoPoly().boundingRect().center();
     const QPointF geoPos = positions.last().lonLat();
-    QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),_endingAlt,
-                                            goalPoint.y(),goalPoint.x(),_endingAlt);
+    QVector3D enuPos = Conversions::lla2enu(geoPos.y(),geoPos.x(),_alt,
+                                            goalPoint.y(),goalPoint.x(),_alt);
+    const qreal stdDev = 30.0;
     qreal dist = enuPos.length();
 
-    if (dist < _stdDev)
+    if (this->geoPoly().containsPoint(geoPos,Qt::OddEvenFill))
         goalScore += 500;
     else
-        goalScore += 10*PathTask::normal(dist,_stdDev);
+        goalScore += 10*PathTask::normal(dist,stdDev);
 
     return qMin<qreal>(500.0,goalScore);
 }
@@ -40,19 +39,20 @@ QString EndingTask::taskType() const
 
 QSharedPointer<PathTask> EndingTask::copy() const
 {
-    return QSharedPointer<PathTask>(new EndingTask(_endingPos,
-                                                   _endingAlt,
-                                                   _stdDev));
+    return QSharedPointer<PathTask>(new EndingTask(_area));
 }
 
 void EndingTask::serialize(QDataStream &stream)
 {
-    stream << _endingPos;
-    stream << _endingAlt;
-    stream << _stdDev;
+    stream << _area;
 }
 
-void EndingTask::setEndingPos(QPointF endingPos)
+bool EndingTask::shortnessRewardApplies() const
 {
-    _endingPos = endingPos;
+    return true;
+}
+
+void EndingTask::setEndingArea(const QPolygonF& area)
+{
+    _area = area;
 }

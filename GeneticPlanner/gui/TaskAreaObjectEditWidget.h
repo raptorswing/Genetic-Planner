@@ -23,6 +23,10 @@ private slots:
 
     void on_AddFlyThruButton_clicked();
 
+    void on_addEndingButton_clicked();
+
+    void on_pushButton_clicked();
+
 private:
     Ui::TaskAreaObjectEditWidget *ui;
 

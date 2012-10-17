@@ -31,10 +31,13 @@ qreal PlanningProblem::fitness(QSharedPointer<Individual> individual)
 
     QList<Position> positions = individual->generatePositions(this->startingPosition());
 
+    int taskCount = 0;
     foreach(QSharedPointer<TaskArea> area, this->areas())
     {
         foreach(QSharedPointer<PathTask> task, area->tasks())
         {
+            taskCount++;
+            task->setGeoPoly(area->geoPoly());
             qreal score = task->performance(positions);
             toRet += score;
             if (task->shortnessRewardApplies())
@@ -43,7 +46,9 @@ qreal PlanningProblem::fitness(QSharedPointer<Individual> individual)
         }
     }
 
-    toRet += shortnessBonus;
+    //Only apply shortness bonus if we've accomplished all tasks
+    if (toRet >= taskCount*500)
+        toRet += shortnessBonus;
     return toRet;
 }
 
@@ -80,7 +85,7 @@ void PlanningProblem::addArea(QSharedPointer<TaskArea> area)
 
     TaskArea * rawArea = area.data();
     connect(rawArea,
-            SIGNAL(changed()),
+            SIGNAL(taskAreaChanged()),
             this,
             SIGNAL(changed()));
 

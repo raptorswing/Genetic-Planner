@@ -26,16 +26,16 @@ void TaskArea::addTask(QSharedPointer<PathTask> task)
 
     PathTask * rawTask = task.data();
     connect(rawTask,
-            SIGNAL(changed()),
+            SIGNAL(taskAreaChanged()),
             this,
-            SIGNAL(changed()));
+            SIGNAL(taskAreaChanged()));
     connect(this,
             SIGNAL(geoPolyChanged(QPolygonF)),
             rawTask,
             SLOT(setGeoPoly(QPolygonF)));
 
     _tasks.insert(task);
-    this->changed();
+    this->taskAreaChanged();
 }
 
 void TaskArea::removeTask(QSharedPointer<PathTask> task)
@@ -44,7 +44,7 @@ void TaskArea::removeTask(QSharedPointer<PathTask> task)
         return;
 
     _tasks.remove(task);
-    this->changed();
+    this->taskAreaChanged();
 }
 
 QSet<QSharedPointer<PathTask> > TaskArea::tasks() const
@@ -65,7 +65,7 @@ void TaskArea::setGeoPoly(const QPolygonF &geoPoly)
 
     _geoPoly = geoPoly;
     this->geoPolyChanged(geoPoly);
-    this->changed();
+    this->taskAreaChanged();
 }
 
 //private

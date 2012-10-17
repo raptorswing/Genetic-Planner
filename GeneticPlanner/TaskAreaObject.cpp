@@ -17,7 +17,7 @@ TaskAreaObject::TaskAreaObject(QWeakPointer<TaskArea> area, QColor fillColor, QO
 
     TaskArea * rawArea = strong.data();
     connect(rawArea,
-            SIGNAL(changed()),
+            SIGNAL(taskAreaChanged()),
             this,
             SLOT(handleAreaChanged()));
     connect(rawArea,

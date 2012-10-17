@@ -363,6 +363,15 @@ void CompositeTileSource::handleTileRetrieved(quint32 x, quint32 y, quint8 z)
         return;
     }
 
+    /*
+    QImage mask;
+    if (tile->pixel(0,0) == qRgb(242,239,233))
+        mask = tile->createMaskFromColor(qRgb(242,239,233),Qt::MaskOutColor);
+    else
+        mask = tile->createMaskFromColor(qRgb(241,238,232),Qt::MaskOutColor);
+    tile->setAlphaChannel(mask);
+    */
+
     //qDebug() << this << "Retrieved tile" << x << y << z << "from" << tileSource;
 
     /*
