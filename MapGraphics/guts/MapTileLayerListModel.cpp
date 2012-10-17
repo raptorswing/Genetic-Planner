@@ -71,11 +71,9 @@ Qt::ItemFlags MapTileLayerListModel::flags(const QModelIndex &index) const
 
 void MapTileLayerListModel::handleCompositeSourcesChanged()
 {
-    /*
     QModelIndex topleft = this->index(0);
     QModelIndex bottomright = this->index(this->rowCount());
     this->dataChanged(topleft,bottomright);
-    */
 }
 
 void MapTileLayerListModel::handleCompositeSourcesAdded(int index)
