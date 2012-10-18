@@ -3,9 +3,11 @@
 
 #include <QPointF>
 #include <QtDebug>
-#include <QDataStream>
+#include <QVector3D>
 
-class Position
+#include "MapGraphics_global.h"
+
+class MAPGRAPHICSSHARED_EXPORT Position
 {
 public:
     Position();
@@ -36,12 +38,10 @@ private:
 };
 
 //Non-member method for streaming to qDebug
-QDebug operator<<(QDebug dbg, const Position& pos);
+MAPGRAPHICSSHARED_EXPORT QDebug operator<<(QDebug dbg, const Position& pos);
 
 //Non-member methods for serializing and de-serializing
-QDataStream& operator<<(QDataStream& stream, const Position& pos);
-QDataStream& operator>>(QDataStream& stream, Position& pos);
-
-
+MAPGRAPHICSSHARED_EXPORT QDataStream& operator<<(QDataStream& stream, const Position& pos);
+MAPGRAPHICSSHARED_EXPORT QDataStream& operator>>(QDataStream& stream, Position& pos);
 
 #endif // POSITION_H

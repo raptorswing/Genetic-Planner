@@ -43,12 +43,7 @@ qreal CompleteCoverageTask::performance(const QList<Position> &positions)
     QSet<QVector3D> hits;
     foreach(const Position & planePos, positions)
     {
-        //Annoying conversion necessary...
-        Conversions::Position convPos;
-        convPos.altitude = planePos.altitude();
-        convPos.lonlat = planePos.lonLat();
-
-        QVector3D pos = Conversions::lla2xyz(convPos);
+        QVector3D pos = Conversions::lla2xyz(planePos);
         foreach(const QVector3D & sensorPoint, toCheck)
         {
             const qreal dist = (pos - sensorPoint).length();

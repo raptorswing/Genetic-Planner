@@ -30,7 +30,6 @@ SOURCES += main.cpp\
     TaskAreaObject.cpp \
     gui/MWCommand.cpp \
     TaskArea.cpp \
-    Position.cpp \
     Pose.cpp \
     ProblemModelAdapter.cpp \
     gui/TaskAreaObjectEditWidget.cpp \
@@ -56,7 +55,6 @@ HEADERS  += gui/MainWindow.h \
     TaskAreaObject.h \
     gui/MWCommand.h \
     TaskArea.h \
-    Position.h \
     Pose.h \
     ProblemModelAdapter.h \
     gui/TaskAreaObjectEditWidget.h \

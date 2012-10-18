@@ -101,12 +101,11 @@ QVector3D Position::Position2ENU(const Position &refPos, const Position &pos)
 //static
 Position Position::fromENU(const Position &refPos, const QVector3D &enu)
 {
-    Conversions::Position cPos = Conversions::enu2lla(enu,
+    Position cPos = Conversions::enu2lla(enu,
                                                       refPos.latitude(),
                                                       refPos.longitude(),
                                                       refPos.altitude());
-    return Position(cPos.lonlat,
-                    cPos.altitude);
+    return cPos;
 }
 
 //Non-member method for streaming to qDebug

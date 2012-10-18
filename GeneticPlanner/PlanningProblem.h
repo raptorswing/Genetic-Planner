@@ -65,7 +65,6 @@ QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem);
 QDataStream & operator<< (QDataStream& stream, const QSharedPointer<PathTask>& problem);
 QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem);
 
-
 bool operator==(const TaskArea& A, const TaskArea& B);
 bool operator!=(const TaskArea& A, const TaskArea& B);
 uint qHash(const TaskArea& area);

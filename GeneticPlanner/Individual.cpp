@@ -143,13 +143,13 @@ QList<Position> Individual::generatePositions(const Position &startingPos) const
             enuPos.setY(sin(directionRad));
             enuPos.normalize();
             enuPos *= distanceMult;
-            QPointF newGeoPos = Conversions::enu2lla(enuPos.x(),
+            Position newPosition = Conversions::enu2lla(enuPos.x(),
                                                      enuPos.y(),
                                                      enuPos.z(),
                                                      geoPos.latitude(),
                                                      geoPos.longitude(),
-                                                     0.0).lonlat;
-            Position newPosition(newGeoPos,1500);
+                                                     0.0);
+            newPosition.setAltitude(1500);
             toRet.append(newPosition);
         }
     }

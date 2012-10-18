@@ -204,4 +204,3 @@ QDataStream & operator>> (QDataStream& stream, QSharedPointer<PathTask>& problem
         problem = QSharedPointer<PathTask>(new EndingTask(stream));
     return stream;
 }
-
