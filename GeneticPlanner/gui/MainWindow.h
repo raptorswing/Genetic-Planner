@@ -34,7 +34,6 @@ private slots:
     void handlePlanningControlPauseRequested();
     void handlePlanningControlResetRequested();
     void handleStartPointAddRequested();
-    void handleEndPointAddRequested();
     void handleTaskAreaAddRequested();
     void handlePlanningPaused();
     void handlePlanningCleared();

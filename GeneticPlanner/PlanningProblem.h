@@ -34,9 +34,6 @@ public:
     bool isStartDefined() const;
     Position startingPosition() const;
 
-    bool isEndDefined() const;
-    Position endingPosition() const;
-
 public slots:
     void addArea(QSharedPointer<TaskArea> area);
     void removeArea(QSharedPointer<TaskArea> area);
@@ -44,17 +41,11 @@ public slots:
     void setStartPosition(const Position& pos);
     void clearStartPosition();
 
-    void setEndPosition(const Position& pos);
-    void clearEndPosition();
-
 signals:
     void changed();
 
     void startPositionChanged(const Position& pos);
-    void endPositionChanged(const Position& pos);
-
     void startPositionRemoved();
-    void endPositionRemoved();
 
     void areaAdded(QSharedPointer<TaskArea> area);
     void areaRemoved(QSharedPointer<TaskArea> area);
@@ -67,9 +58,6 @@ private:
 
     Position _startPos;
     bool _startIsDefined;
-
-    Position _endPos;
-    bool _endIsDefined;
 };
 
 QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem);

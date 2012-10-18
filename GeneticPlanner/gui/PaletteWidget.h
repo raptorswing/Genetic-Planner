@@ -17,13 +17,10 @@ public:
 
 signals:
     void addStartPointRequested();
-    void addEndPointRequested();
     void addTaskAreaRequested();
     
 private slots:
     void on_startPointButton_clicked();
-
-    void on_endPointButton_clicked();
 
     void on_taskAreaButton_clicked();
 

@@ -70,12 +70,6 @@ MainWindow::MainWindow(QWidget *parent) :
             this,
             SLOT(handlePlanningControlResetRequested()));
 
-    //When the user uses the palette to request adding an end point
-    connect(this->ui->paletteWidget,
-            SIGNAL(addEndPointRequested()),
-            this,
-            SLOT(handleEndPointAddRequested()));
-
     //When the user uses the palette to request adding a start point
     connect(this->ui->paletteWidget,
             SIGNAL(addStartPointRequested()),
@@ -175,14 +169,6 @@ void MainWindow::handleStartPointAddRequested()
     Position position(_view->center(),
                       1500);
     _planner->problem()->setStartPosition(position);
-}
-
-//private slot
-void MainWindow::handleEndPointAddRequested()
-{
-    Position position(_view->center(),
-                      1500);
-    _planner->problem()->setEndPosition(position);
 }
 
 //private slot

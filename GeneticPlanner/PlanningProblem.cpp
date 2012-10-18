@@ -9,7 +9,6 @@
 PlanningProblem::PlanningProblem()
 {
     _startIsDefined = false;
-    _endIsDefined = false;
 }
 
 PlanningProblem::~PlanningProblem()
@@ -67,16 +66,6 @@ Position PlanningProblem::startingPosition() const
     return _startPos;
 }
 
-bool PlanningProblem::isEndDefined() const
-{
-    return _endIsDefined;
-}
-
-Position PlanningProblem::endingPosition() const
-{
-    return _endPos;
-}
-
 //public slot
 void PlanningProblem::addArea(QSharedPointer<TaskArea> area)
 {
@@ -125,24 +114,6 @@ void PlanningProblem::clearStartPosition()
     qDebug() << "Start Area Cleared";
 }
 
-//public slot
-void PlanningProblem::setEndPosition(const Position &pos)
-{
-    _endPos = pos;
-    _endIsDefined = true;
-    this->endPositionChanged(pos);
-    this->changed();
-}
-
-//public slot
-void PlanningProblem::clearEndPosition()
-{
-    _endIsDefined = false;
-    this->endPositionRemoved();
-    this->changed();
-    qDebug() << "End Area Cleared";
-}
-
 //private
 PlanningProblem::PlanningProblem(const PlanningProblem &other)
 {
@@ -176,12 +147,6 @@ QDataStream & operator<< (QDataStream& stream, const PlanningProblem& problem)
         stream << problem.startingPosition();
     }
 
-    //Ending position
-    {
-        stream << problem.isEndDefined();
-        stream << problem.endingPosition();
-    }
-
     return stream;
 }
 
@@ -211,19 +176,6 @@ QDataStream & operator>> (QDataStream& stream, PlanningProblem& problem)
             problem.setStartPosition(pos);
         else
             problem.clearStartPosition();
-    }
-
-    //Ending Position
-    {
-        bool isDefined;
-        Position pos;
-        stream >> isDefined;
-        stream >> pos;
-
-        if (isDefined)
-            problem.setEndPosition(pos);
-        else
-            problem.clearEndPosition();
     }
 
     return stream;

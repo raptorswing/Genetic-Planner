@@ -26,16 +26,6 @@ void ProblemModelAdapter::setProblem(QWeakPointer<PlanningProblem> problem)
         _startMarker = 0;
     }
 
-    if (!_endMarker.isNull())
-    {
-        disconnect(_endMarker.data(),
-                   SIGNAL(destroyed()),
-                   this,
-                   SLOT(handleEndMarkerDestroyed()));
-        _endMarker->deleteLater();
-        _endMarker = 0;
-    }
-
     _problem = problem;
     if (problem.isNull())
         return;
@@ -53,15 +43,6 @@ void ProblemModelAdapter::setProblem(QWeakPointer<PlanningProblem> problem)
             SIGNAL(startPositionRemoved()),
             this,
             SLOT(handleStartPositionRemoved()));
-
-    connect(raw,
-            SIGNAL(endPositionChanged(Position)),
-            this,
-            SLOT(handleEndPositionChanged(Position)));
-    connect(raw,
-            SIGNAL(endPositionRemoved()),
-            this,
-            SLOT(handleEndPositionRemoved()));
 
     connect(raw,
             SIGNAL(areaAdded(QSharedPointer<TaskArea>)),
@@ -101,37 +82,6 @@ void ProblemModelAdapter::handleStartPositionRemoved()
 }
 
 //private slot
-void ProblemModelAdapter::handleEndPositionChanged(const Position &pos)
-{
-    if (_endMarker.isNull())
-    {
-        _endMarker = new CircleObject(START_END_MARKER_RADIUS,
-                                      true,
-                                      Qt::red);
-        _scene->addObject(_endMarker);
-        connect(_endMarker.data(),
-                SIGNAL(posChanged()),
-                this,
-                SLOT(handleEndMarkerMoved()));
-        connect(_endMarker.data(),
-                SIGNAL(destroyed()),
-                this,
-                SLOT(handleEndMarkerDestroyed()));
-        _endMarker->setZValue(50);
-    }
-    _endMarker->setPos(pos.lonLat());
-}
-
-//private slot
-void ProblemModelAdapter::handleEndPositionRemoved()
-{
-    if (_endMarker.isNull())
-        return;
-    _endMarker->deleteLater();
-    _endMarker = 0;
-}
-
-//private slot
 void ProblemModelAdapter::handleStartMarkerMoved()
 {
     if (_startMarker.isNull())
@@ -155,32 +105,6 @@ void ProblemModelAdapter::handleStartMarkerDestroyed()
         return;
 
     strongProblem->clearStartPosition();
-}
-
-//private slot
-void ProblemModelAdapter::handleEndMarkerMoved()
-{
-    if (_endMarker.isNull())
-        return;
-
-    QPointF geoPos = _endMarker->pos();
-    Position pos(geoPos,1500);
-
-    QSharedPointer<PlanningProblem> strongProblem = _problem.toStrongRef();
-    if (strongProblem.isNull())
-        return;
-
-    strongProblem->setEndPosition(pos);
-}
-
-//private slot
-void ProblemModelAdapter::handleEndMarkerDestroyed()
-{
-    QSharedPointer<PlanningProblem> strongProblem = _problem.toStrongRef();
-    if (strongProblem.isNull())
-        return;
-
-    strongProblem->clearEndPosition();
 }
 
 void ProblemModelAdapter::handleAreaAdded(QSharedPointer<TaskArea> area)
