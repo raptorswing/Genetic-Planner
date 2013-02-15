@@ -4,7 +4,10 @@
 #include "MapTileLayerListModel.h"
 #include "MapTileSourceDelegate.h"
 
+#include "tileSources/OSMTileSource.h"
+
 #include <QtDebug>
+#include <QMenu>
 
 CompositeTileSourceConfigurationWidget::CompositeTileSourceConfigurationWidget(QWeakPointer<CompositeTileSource> composite,
                                                              QWidget *parent) :
@@ -66,6 +69,39 @@ void CompositeTileSourceConfigurationWidget::handleCompositeChange()
 }
 
 //private slot
+void CompositeTileSourceConfigurationWidget::addOSMTileLayer()
+{
+    QSharedPointer<CompositeTileSource> composite = _composite.toStrongRef();
+    if (composite.isNull())
+        return;
+
+    QSharedPointer<OSMTileSource> source(new OSMTileSource(OSMTileSource::OSMTiles));
+    composite->addSourceTop(source);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::addMapQuestLayer()
+{
+    QSharedPointer<CompositeTileSource> composite = _composite.toStrongRef();
+    if (composite.isNull())
+        return;
+
+    QSharedPointer<OSMTileSource> source(new OSMTileSource(OSMTileSource::MapQuestOSMTiles));
+    composite->addSourceTop(source);
+}
+
+//private slot
+void CompositeTileSourceConfigurationWidget::addMapQuestSatLayer()
+{
+    QSharedPointer<CompositeTileSource> composite = _composite.toStrongRef();
+    if (composite.isNull())
+        return;
+
+    QSharedPointer<OSMTileSource> source(new OSMTileSource(OSMTileSource::MapQuestAerialTiles));
+    composite->addSourceTop(source);
+}
+
+//private slot
 void CompositeTileSourceConfigurationWidget::on_removeSourceButton_clicked()
 {
     QItemSelectionModel * selModel = this->ui->listView->selectionModel();
@@ -76,6 +112,8 @@ void CompositeTileSourceConfigurationWidget::on_removeSourceButton_clicked()
         return;
 
     strong->removeSource(index.row());
+
+    selModel->clear();
 }
 
 //private slot
@@ -113,6 +151,8 @@ void CompositeTileSourceConfigurationWidget::on_moveDownButton_clicked()
     int currentIndex = index.row();
     int desiredIndex = qMin<int>(numberOfLayers-1,currentIndex+1);
     strong->moveSource(currentIndex,desiredIndex);
+    selModel->setCurrentIndex(selModel->model()->index(desiredIndex,0),
+                              QItemSelectionModel::SelectCurrent);
 }
 
 //private slot
@@ -131,6 +171,8 @@ void CompositeTileSourceConfigurationWidget::on_moveUpButton_clicked()
     int currentIndex = index.row();
     int desiredIndex = qMax<int>(0,currentIndex-1);
     strong->moveSource(currentIndex,desiredIndex);
+    selModel->setCurrentIndex(selModel->model()->index(desiredIndex,0),
+                              QItemSelectionModel::SelectCurrent);
 }
 
 //private
@@ -159,4 +201,12 @@ void CompositeTileSourceConfigurationWidget::init()
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this,
             SLOT(handleCurrentSelectionChanged(QModelIndex,QModelIndex)));
+
+
+    //Build a menu of possible sources for the "add" button
+    QMenu * menu = new QMenu(this->ui->addSourceButton);
+    menu->addAction("OpenStreetMap Tiles", this, SLOT(addOSMTileLayer()));
+    menu->addAction("MapQuest-OSM Tiles", this, SLOT(addMapQuestLayer()));
+    menu->addAction("MapQuest Open Aerial Tiles", this, SLOT(addMapQuestSatLayer()));
+    this->ui->addSourceButton->setMenu(menu);
 }
