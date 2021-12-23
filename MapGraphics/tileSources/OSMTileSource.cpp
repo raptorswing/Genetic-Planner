@@ -73,14 +73,6 @@ QString OSMTileSource::name() const
         return "OpenStreetMap Tiles";
         break;
 
-    case MapQuestOSMTiles:
-        return "MapQuestOSM Tiles";
-        break;
-
-    case MapQuestAerialTiles:
-        return "MapQuest Aerial Tiles";
-        break;
-
     default:
         return "Unknown Tiles";
         break;
@@ -89,7 +81,7 @@ QString OSMTileSource::name() const
 
 QString OSMTileSource::tileFileExtension() const
 {
-    if (_tileType == OSMTiles || _tileType == MapQuestOSMTiles)
+    if (_tileType == OSMTiles)
         return "png";
     else
         return "jpg";
@@ -106,20 +98,9 @@ void OSMTileSource::fetchTile(quint32 x, quint32 y, quint8 z)
     //Figure out which server to request from based on our desired tile type
     if (_tileType == OSMTiles)
     {
-        host = "http://b.tile.openstreetmap.org";
+        host = "https://b.tile.openstreetmap.org";
         url = "/%1/%2/%3.png";
     }
-    else if (_tileType == MapQuestOSMTiles)
-    {
-        host = "http://otile1.mqcdn.com";
-        url = "/tiles/1.0.0/osm/%1/%2/%3.jpg";
-    }
-    else
-    {
-        host = "http://otile1.mqcdn.com";
-        url = "/tiles/1.0.0/sat/%1/%2/%3.jpg";
-    }
-
 
     //Use the unique cacheID to see if this tile has already been requested
     const QString cacheID = this->createCacheID(x,y,z);
@@ -196,6 +177,23 @@ void OSMTileSource::handleNetworkRequestFinished()
         return;
     }
 
+    //Figure out how long the tile should be cached
+    QDateTime expireTime;
+    if (reply->hasRawHeader("Cache-Control"))
+    {
+        //We support the max-age directive only for now
+        const QByteArray cacheControl = reply->rawHeader("Cache-Control");
+        QRegExp maxAgeFinder("max-age=(\\d+)");
+        if (maxAgeFinder.indexIn(cacheControl) != -1)
+        {
+            bool ok = false;
+            const qint64 delta = maxAgeFinder.cap(1).toULongLong(&ok);
+
+            if (ok)
+                expireTime = QDateTime::currentDateTimeUtc().addSecs(delta);
+        }
+    }
+
     //Notify client of tile retrieval
-    this->prepareRetrievedTile(x,y,z,image);
+    this->prepareNewlyReceivedTile(x,y,z, image, expireTime);
 }

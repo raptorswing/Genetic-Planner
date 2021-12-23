@@ -17,12 +17,13 @@ PolygonObject::PolygonObject(QPolygonF geoPoly, QColor fillColor, QObject *paren
 
 PolygonObject::~PolygonObject()
 {
+    qDebug() << this << "destroying";
     foreach(MapGraphicsObject * circle, _editCircles)
-        circle->deleteLater();
+        this->destroyEditCircle(circle);
     _editCircles.clear();
 
     foreach(MapGraphicsObject * circle, _addVertexCircles)
-        circle->deleteLater();
+        this->destroyAddVertexCircle(circle);
     _addVertexCircles.clear();
 }
 
@@ -127,16 +128,27 @@ QPolygonF PolygonObject::geoPoly() const
 
 void PolygonObject::setGeoPoly(const QPolygonF &newPoly)
 {
-    this->setPos(newPoly.boundingRect().center());
     if (newPoly == _geoPoly)
         return;
 
     _geoPoly = newPoly;
+
+    foreach(MapGraphicsObject * obj, _editCircles)
+        this->destroyEditCircle(obj);
+    foreach(MapGraphicsObject * obj, _addVertexCircles)
+        this->destroyAddVertexCircle(obj);
+    _editCircles.clear();
+    _addVertexCircles.clear();
+
+    this->setPos(newPoly.boundingRect().center());
     this->polygonChanged(newPoly);
 }
 
 void PolygonObject::setFillColor(const QColor &color)
 {
+    if (_fillColor == color)
+        return;
+
     _fillColor = color;
     this->redrawRequested();
 }
@@ -233,6 +245,8 @@ void PolygonObject::handleAddVertexCircleSelected()
     editCircle->setPos(geoPos);
     _editCircles.insert(index,editCircle);
 
+    editCircle->setSelected(true);
+
 
     //Create a new "Add vertex" circle and put it in the right spot
     CircleObject * addVertexCircle = this->constructAddVertexCircle();
@@ -307,6 +321,20 @@ CircleObject *PolygonObject::constructEditCircle()
 }
 
 //private
+void PolygonObject::destroyEditCircle(MapGraphicsObject *obj)
+{
+    disconnect(obj,
+               SIGNAL(posChanged()),
+               this,
+               SLOT(handleEditCirclePosChanged()));
+    disconnect(obj,
+               SIGNAL(destroyed()),
+               this,
+               SLOT(handleEditCircleDestroyed()));
+    obj->deleteLater();
+}
+
+//private
 CircleObject *PolygonObject::constructAddVertexCircle()
 {
     CircleObject * toRet = new CircleObject(3,
@@ -319,5 +347,16 @@ CircleObject *PolygonObject::constructAddVertexCircle()
             SLOT(handleAddVertexCircleSelected()));
 
     this->newObjectGenerated(toRet);
+    toRet->setToolTip("Single-click (don't drag!) to add vertex.");
     return toRet;
+}
+
+//private
+void PolygonObject::destroyAddVertexCircle(MapGraphicsObject *obj)
+{
+    disconnect(obj,
+               SIGNAL(selectedChanged()),
+               this,
+               SLOT(handleAddVertexCircleSelected()));
+    obj->deleteLater();
 }

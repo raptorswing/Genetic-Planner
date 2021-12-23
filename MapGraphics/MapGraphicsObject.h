@@ -8,6 +8,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QGraphicsItem>
+#include <QString>
 
 #include "MapGraphics_global.h"
 
@@ -43,7 +44,7 @@ public:
 
     /*!
      \brief You can reimplement this if you want. Given a point in geographic coordinates (lat/lon),
-     return true if the object contains that point. Return otherwise. The default implementation just uses
+     return true if the object contains that point. Return false otherwise. The default implementation just uses
      boundingRect() to decide.
 
      \param geoPos
@@ -52,7 +53,9 @@ public:
     virtual bool contains(const QPointF& geoPos) const;
 
     /**
-     * @brief Paints the contents of the Object in ENU coordinates --- the same coordinates as boundingRect.
+     * @brief Paints the contents of the Object in ENU coordinates if the object is not zoom invariant.
+     * If it is zoom invariant, the units are pixels. That is, this painter should operate in the same
+     * units as returned by boundingRect().
      * You must implement this.
      *
      * @param painter
@@ -70,7 +73,7 @@ public:
     MapGraphicsObject * parent() const;
     void setParent(MapGraphicsObject *);
 
-    QPointF pos() const;
+    const QPointF& pos() const;
     virtual void setPos(const QPointF&);
 
     qreal rotation() const;
@@ -90,6 +93,9 @@ public:
 
     bool isSelected() const;
     void setSelected(bool);
+
+    QString toolTip() const;
+    void setToolTip(const QString& toolTip);
 
     void setFlag(MapGraphicsObjectFlag, bool enabled=true);
     void setFlags(MapGraphicsObject::MapGraphicsObjectFlags);
@@ -115,6 +121,7 @@ signals:
     void rotationChanged();
     void visibleChanged();
     void zValueChanged();
+    void toolTipChanged(const QString& toolTip);
 
     void flagsChanged();
 
@@ -136,6 +143,9 @@ signals:
     
 public slots:
 
+private slots:
+    void setConstructed();
+
 private:
     bool _sizeIsZoomInvariant;
 
@@ -148,7 +158,11 @@ private:
     qreal _zValue;
     bool _selected;
 
+    QString _toolTip;
+
     MapGraphicsObject::MapGraphicsObjectFlags _flags;
+
+    bool _constructed;
     
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(MapGraphicsObject::MapGraphicsObjectFlags)

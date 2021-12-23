@@ -232,8 +232,8 @@ void PrivateQGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if (_mgObj.isNull())
         return;
 
-    QGraphicsObject::mouseMoveEvent(event);
-    return;
+//    QGraphicsObject::mouseMoveEvent(event);
+//    return;
 
     this->convertSceneMouseEventCoordinates(event);
     _mgObj->mouseMoveEvent(event);
@@ -372,6 +372,12 @@ void PrivateQGraphicsObject::handleMGSelectedChanged()
 }
 
 //private slot
+void PrivateQGraphicsObject::handleMGToolTipChanged(const QString &toolTip)
+{
+    this->setToolTip(toolTip);
+}
+
+//private slot
 void PrivateQGraphicsObject::handleMGFlagsChanged()
 {
     MapGraphicsObject::MapGraphicsObjectFlags flags = _mgObj->flags();
@@ -462,13 +468,21 @@ void PrivateQGraphicsObject::setMGObj(MapGraphicsObject * mgObj)
             this,
             SLOT(handleMGSelectedChanged()));
     connect(_mgObj,
+            SIGNAL(toolTipChanged(QString)),
+            this,
+            SLOT(handleMGToolTipChanged(QString)));
+    connect(_mgObj,
             SIGNAL(flagsChanged()),
             this,
             SLOT(handleMGFlagsChanged()));
-    connect(mgObj,
+    connect(_mgObj,
             SIGNAL(keyFocusRequested()),
             this,
             SLOT(handleKeyFocusRequested()));
+    connect(_mgObj,
+            SIGNAL(redrawRequested()),
+            this,
+            SLOT(handleRedrawRequested()));
 
     //Get all of the info about the MGObject
     this->updateAllFromMG();

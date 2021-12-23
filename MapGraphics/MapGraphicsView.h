@@ -71,6 +71,8 @@ public:
 
     void zoomIn(ZoomMode zMode = CenterZoom);
     void zoomOut(ZoomMode zMode = CenterZoom);
+
+    void rotate(qreal rotation);
     
 signals:
     void zoomLevelChanged(quint8 nZoom);
@@ -78,6 +80,10 @@ signals:
 public slots:
 
 protected slots:
+    virtual void handleChildMouseDoubleClick(QMouseEvent * event);
+    virtual void handleChildMouseMove(QMouseEvent * event);
+    virtual void handleChildMousePress(QMouseEvent * event);
+    virtual void handleChildMouseRelease(QMouseEvent * event);
     virtual void handleChildViewContextMenu(QContextMenuEvent * event);
     virtual void handleChildViewScrollWheel(QWheelEvent * event);
 
